@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Property Details</title>
+ <link rel="stylesheet" href="/css/style.css" />
+
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Your Accommodation</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/#about">About</a>
+      <a href="/inquiry.html">Contact</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Back Button -->
+    <button onclick="history.back()" class="button" style="margin-bottom:20px;">
+      ← Back
+    </button>
+
+    <div id="details" class="details-card">
+      <div id="gallery" class="gallery"></div>
+
+      <div class="details-text">
+        <h2 id="title"></h2>
+        <p id="meta" class="muted"></p>
+        <p id="price" class="price"></p>
+        <p id="desc"></p>
+
+        <ul id="extras" class="extras"></ul>
+
+        <div style="margin-top:16px;">
+          <a id="contactLink" class="button" href="/inquiry.html">Contact About This Property</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const qs = new URLSearchParams(location.search);
+    const id = qs.get('id');
+
+    async function loadProperty() {
+      if (!id) {
+        document.getElementById('details').innerHTML = '<p>Property not specified.</p>';
+        return;
+      }
+      try {
+        const res = await fetch(`/properties/${id}`);
+        if (!res.ok) throw new Error('Not found');
+        const p = await res.json();
+
+        const images = p.images ? p.images.split(',') : [];
+        const gallery = document.getElementById('gallery');
+        gallery.innerHTML = '';
+        if (images.length) {
+          const main = document.createElement('img');
+          main.src = images[0];
+          main.className = 'main-img';
+          gallery.appendChild(main);
+
+          const thumbs = document.createElement('div');
+          thumbs.className = 'thumbs';
+          images.forEach(src => {
+            const t = document.createElement('img');
+            t.src = src;
+            t.className = 'thumb';
+            t.onclick = () => main.src = src;
+            thumbs.appendChild(t);
+          });
+          gallery.appendChild(thumbs);
+        } else {
+          gallery.innerHTML = '<div class="noimg">No images</div>';
+        }
+
+        document.getElementById('title').innerText = p.title || '';
+        document.getElementById('meta').innerText = p.location || '';
+        document.getElementById('price').innerText = p.price ? `R${p.price} / Month` : '';
+        document.getElementById('desc').innerText = p.description || '';
+
+        const extras = [];
+        if (p.room_type) extras.push(`Room Type: ${p.room_type}`);
+        if (p.student_types) extras.push(`Available For: ${p.student_types}`);
+        if (p.funding_options) extras.push(`Funding: ${p.funding_options}`);
+
+        if (p.deposit_type === 'YES') extras.push(`Deposit: R${p.deposit_amount} (Refundable, T&Cs apply)`);
+        else extras.push('No Deposit');
+
+        if (p.rooms_available !== null && p.rooms_available !== undefined)
+          extras.push(`Rooms Available: ${p.rooms_available}`);
+
+        const ul = document.getElementById('extras');
+        ul.innerHTML = '';
+        extras.forEach(x => {
+          const li = document.createElement('li'); 
+          li.innerText = x; 
+          ul.appendChild(li);
+        });
+
+        const contactLink = document.getElementById('contactLink');
+        contactLink.href = `/inquiry.html?propertyId=${p.id}`;
+      } catch (err) {
+        document.getElementById('details').innerHTML = '<p>Could not load property.</p>';
+        console.error(err);
+      }
+    }
+
+    loadProperty();
+  </script>
+</body>
+</html>

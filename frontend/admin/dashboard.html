@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/style.css" />
+
+</head>
+<body>
+<script>
+if (!localStorage.getItem("admin_token")) location.href = "/admin-login.html";
+</script>
+
+<div class="container">
+  <h1>Admin Dashboard</h1>
+
+  <div class="admin-wrap">
+    <aside class="admin-sidebar">
+      <strong>Menu</strong>
+      <div class="menu-item" data-href="dashboard.html">Dashboard</div>
+      <div class="menu-item" data-href="properties.html">Manage Properties</div>
+      <div class="menu-item" data-href="inquiries.html">Student Inquiries</div>
+      <div class="menu-item" data-href="settings.html">Settings</div>
+      <div style="margin-top:12px"><button onclick="logout()">Logout</button></div>
+    </aside>
+
+    <main class="admin-main">
+      <h2>Overview</h2>
+      <div id="overview">Loading stats...</div>
+    </main>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

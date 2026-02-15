@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Your Accommodation</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Your Accommodation</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="#about">About</a>
+      <a href="/inquiry.html">Contact</a>
+      <button class="admin-login-btn" onclick="window.location.href='/admin-login.html'">Admin Login</button>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Hero Section -->
+    <section class="hero">
+      <h1>Find A Student-Friendly Accommodation Near Campus</h1>
+
+      <div class="search-row">
+        <select id="searchMode">
+          <option value="location">Search By Location</option>
+          <option value="name">Search By House Name</option>
+        </select>
+
+        <input id="searchInput" placeholder="Type To Search..." />
+        <button id="searchBtn">Search</button>
+        <button id="clearBtn" class="muted">Clear</button>
+      </div>
+    </section>
+
+    <!-- Property Display -->
+    <section id="property-list" class="cards-grid"></section>
+
+    <!-- ======================
+         ABOUT SECTION
+    ======================= -->
+    <section id="about" style="margin-top:40px;">
+      <h2>About Us</h2>
+      <p>
+        We are dedicated to helping students find safe, affordable and comfortable accommodation near campuses.
+        Our platform connects students with trusted landlords, allowing you to explore, compare and inquire easily.
+        Whether you are a first-year student or returning, we aim to make your accommodation search simple and stress-free.
+      </p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <div>© <span id="year"></span> Your Accommodation Powered By PitchCS</div>
+  </footer>
+
+  <script src="/js/script.js"></script>
+  <script>
+    document.getElementById('year').innerText = new Date().getFullYear();
+  </script>
+</body>
+</html>

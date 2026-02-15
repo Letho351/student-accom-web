@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Admin — Inquiries</title>
+<link rel="stylesheet" href="/css/style.css" />
+
+</head>
+<body>
+  <script>
+    if (!localStorage.getItem("admin_token")) location.href = '/admin-login.html';
+  </script>
+
+  <div class="container">
+    <h1>Student Inquiries</h1>
+    <div class="admin-wrap">
+      <aside class="admin-sidebar">
+        <strong>Menu</strong>
+        <div class="menu-item" data-href="dashboard.html">Dashboard</div>
+        <div class="menu-item" data-href="properties.html">Properties</div>
+        <div class="menu-item active" data-href="inquiries.html">Student Inquiries</div>
+        <div class="menu-item" data-href="settings.html">Settings</div>
+        <div style="margin-top:12px"><button onclick="logout()">Logout</button></div>
+      </aside>
+
+      <main class="admin-main">
+        <div>
+          <label>Filter by status</label>
+          <select id="filterStatus">
+            <option value="">All</option>
+            <option>New</option>
+            <option>CONTACTED</option>
+            <option>VIEWING SCHEDULED</option>
+            <option>PLACED</option>
+            <option>LOST</option>
+          </select>
+        </div>
+
+        <div id="inqList" style="margin-top:12px"></div>
+      </main>
+    </div>
+  </div>
+
+  <script src="admin.js"></script>
+  <script>
+    // client-side filter that hides cards that don't match selection
+    document.getElementById('filterStatus').addEventListener('change', async () => {
+      const desired = document.getElementById('filterStatus').value;
+      // reload to get latest statuses, then filter view
+      await window.loadAdminInquiries();
+      if (!desired) return;
+      const container = document.getElementById('inqList');
+      Array.from(container.children).forEach(card => {
+        const sel = card.querySelector('.statusSel');
+        if (!sel) return;
+        card.style.display = (sel.value === desired) ? '' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

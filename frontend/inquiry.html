@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Contact / Inquiry</title>
+ <link rel="stylesheet" href="/css/style.css" />
+
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Your Accommodation</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/property.html">About</a>
+      <a href="/inquiry.html">Contact</a>
+    </nav>
+  </header>
+
+  <main class="container narrow">
+    <h2>Send an inquiry</h2>
+
+    <form id="inqForm">
+      <label>Full name</label>
+      <input id="name" required />
+
+      <label>Email</label>
+      <input id="email" type="email" required />
+
+      <label>Phone (WhatsApp)</label>
+      <input id="phone" required />
+
+      <label>Preferred contact</label>
+      <select id="preferred_contact" required>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="email">Email</option>
+        <option value="phone">Phone call</option>
+      </select>
+
+      <label>Property</label>
+      <select id="propertySelect" required>
+        <option value="">Loading properties...</option>
+      </select>
+
+      <label>Message (optional)</label>
+      <textarea id="message" rows="4"></textarea>
+
+      <button type="submit" class="button">Send inquiry</button>
+    </form>
+
+    <p id="formMsg" class="muted"></p>
+  </main>
+
+  <script>
+    async function loadPropertiesIntoSelect() {
+      try {
+        const res = await fetch('/properties');
+        const list = await res.json();
+        const sel = document.getElementById('propertySelect');
+        sel.innerHTML = '<option value="">Choose a property</option>';
+        list.forEach(p => {
+          const opt = document.createElement('option');
+          opt.value = p.id;
+          opt.text = `${p.title} – (R${p.price || 'n/a'}, ${p.location || ''})`;
+          sel.appendChild(opt);
+        });
+
+        const params = new URLSearchParams(window.location.search);
+        const propId = params.get('propertyId');
+        if (propId) sel.value = propId;
+      } catch (err) {
+        console.error(err);
+        document.getElementById('propertySelect').innerHTML = '<option value="">Error loading</option>';
+      }
+    }
+
+    loadPropertiesIntoSelect();
+
+    document.getElementById('inqForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        phone: document.getElementById('phone').value,
+        preferred_contact: document.getElementById('preferred_contact').value,
+        propertyId: document.getElementById('propertySelect').value,
+        property_name: document.getElementById('propertySelect').selectedOptions[0].text,
+        message: document.getElementById('message').value || null
+      };
+
+      const res = await fetch('/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('formMsg').innerText = data.message || 'Inquiry sent!';
+        document.getElementById('inqForm').reset();
+      } else {
+        document.getElementById('formMsg').innerText = (data.message || data.error) || 'Failed to send';
+      }
+    });
+  </script>
+</body>
+</html>
