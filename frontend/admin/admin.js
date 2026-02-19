@@ -104,8 +104,9 @@ async function saveProperty() {
   const f = Array.from(document.getElementById('funding_options').selectedOptions).map(o => o.text).join(',');
   fd.append('funding_options', f);
 
+  // Append files with name "images" to match server upload.array('images')
   const files = document.getElementById('images').files;
-  for (let i=0;i<files.length;i++) fd.append('images', files[i]);
+  for (let i = 0; i < files.length; i++) fd.append('images', files[i]);
 
   try {
     let res;

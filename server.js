@@ -1,8 +1,8 @@
 require('dotenv').config();
+const upload = require("./upload");
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
-const multer = require('multer');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
@@ -14,9 +14,8 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Serve frontend + uploads
+// Serve frontend
 app.use(express.static(path.join(__dirname, 'frontend')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // DB pool (promise API)
 const db = mysql.createPool({
@@ -40,15 +39,6 @@ db.getConnection()
   .catch(err => { 
     console.error('❌ DB connection error:', err); 
   });
-
-// Uploads config
-const uploadDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname.replace(/\s+/g, '_'))
-});
-const upload = multer({ storage });
 
 // JWT auth
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
@@ -159,7 +149,7 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
       deposit_type, deposit_amount, rooms_available
     } = req.body;
 
-    const filenames = (req.files || []).map(f => `/uploads/${f.filename}`).join(',');
+    const imageUrls = (req.files || []).map(f => f.path).join(',');
 
     const [result] = await db.query(
       `INSERT INTO properties
@@ -171,7 +161,7 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
         location || null,
         (price && price !== '') ? price : null,
         description || null,
-        filenames || null,
+        imageUrls || null,
         room_type || null,
         student_types || null,
         funding_options || null,
@@ -201,7 +191,7 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
       deposit_type, deposit_amount, rooms_available
     } = req.body;
 
-    const newFiles = (req.files || []).map(f => `/uploads/${f.filename}`).join(',');
+    const newFiles = (req.files || []).map(f => f.path).join(',');
     const imagesToSave = newFiles ? newFiles : existing.images;
 
     await db.query(
@@ -239,11 +229,7 @@ app.delete('/properties/:id', authMiddleware, async (req, res) => {
     const [rows] = await db.query('SELECT images FROM properties WHERE id = ?', [id]);
     if (!rows.length) return res.status(404).json({ message: 'Property not found' });
     const images = rows[0].images;
-    if (images) {
-      images.split(',').forEach(rel => {
-        try { const p = path.join(__dirname, rel.replace(/^\//, '')); if (fs.existsSync(p)) fs.unlinkSync(p); } catch(e) {}
-      });
-    }
+    // NOTE: Since images are on Cloudinary, we could optionally delete them from Cloudinary here
     await db.query('DELETE FROM properties WHERE id = ?', [id]);
     res.json({ message: 'Property deleted' });
   } catch (err) {
@@ -275,7 +261,6 @@ app.put('/admin/inquiries/:id', authMiddleware, async (req, res) => {
   }
 });
 
-/* ✅ ADDED DELETE ROUTE FOR INQUIRIES */
 app.delete('/admin/inquiries/:id', authMiddleware, async (req, res) => {
   try {
     const id = req.params.id;
@@ -296,7 +281,7 @@ app.delete('/admin/inquiries/:id', authMiddleware, async (req, res) => {
   }
 });
 
-// fallback
+// fallback for everything else
 app.use((req, res) => res.status(404).send('Not found'));
 
 const PORT = Number(process.env.PORT || 4000);
