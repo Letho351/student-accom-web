@@ -1,23 +1,35 @@
-require('dotenv').config();
+require("dotenv").config();
+const fs = require("fs");
+
+console.log("🔥 RAILWAY ENV CHECK", {
+  name: process.env.CLOUDINARY_CLOUD_NAME,
+  key: process.env.CLOUDINARY_API_KEY,
+  secret: process.env.CLOUDINARY_API_SECRET ? "SET" : "MISSING"
+});
+
+// Ensure tmp directory exists (important for Railway)
+if (!fs.existsSync("tmp")) {
+  fs.mkdirSync("tmp");
+}
+
 const upload = require("./upload");
+const cloudinary = require('./cloudinary');
 const express = require('express');
 const cors = require('cors');
 const mysql = require('mysql2');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 app.use(cors());
-// Accept JSON and form submissions
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve frontend
 app.use(express.static(path.join(__dirname, 'frontend')));
 
-// DB pool (promise API)
+// ---------------- DB ----------------
 const db = mysql.createPool({
   host: process.env.MYSQLHOST,
   user: process.env.MYSQLUSER,
@@ -26,142 +38,166 @@ const db = mysql.createPool({
   port: Number(process.env.MYSQLPORT || 3306),
   waitForConnections: true,
   connectionLimit: 10,
-  ssl: {
-    rejectUnauthorized: false
-  }
+  ssl: { rejectUnauthorized: false }
 }).promise();
 
 db.getConnection()
-  .then(conn => { 
-    console.log('✅ Database connected'); 
-    conn.release(); 
-  })
-  .catch(err => { 
-    console.error('❌ DB connection error:', err); 
-  });
+  .then(conn => { console.log('✅ Database connected'); conn.release(); })
+  .catch(err => console.error('❌ DB connection error:', err));
 
-// JWT auth
+// ---------------- JWT ----------------
 const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
+
 function authMiddleware(req, res, next) {
   const hdr = req.headers.authorization;
   if (!hdr) return res.status(401).json({ error: 'Missing token' });
-  const token = hdr.split(' ')[1];
+
   try {
-    req.admin = jwt.verify(token, JWT_SECRET);
+    req.admin = jwt.verify(hdr.split(' ')[1], JWT_SECRET);
     next();
-  } catch (err) {
+  } catch {
     return res.status(401).json({ error: 'Invalid token' });
   }
 }
 
-/* ---------------- PUBLIC ROUTES ---------------- */
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'frontend', 'index.html')));
+// ---------------- PUBLIC ----------------
+app.get('/', (req, res) =>
+  res.sendFile(path.join(__dirname, 'frontend', 'index.html'))
+);
 
-// GET properties
 app.get('/properties', async (req, res) => {
   try {
     const [rows] = await db.query('SELECT * FROM properties ORDER BY id DESC');
     res.json(rows);
-  } catch (err) {
-    console.error('GET /properties error', err);
+  } catch {
     res.status(500).json({ message: 'Database error' });
   }
 });
 
-// GET single property
 app.get('/properties/:id', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT * FROM properties WHERE id = ?', [req.params.id]);
+    const [rows] = await db.query(
+      'SELECT * FROM properties WHERE id = ?', [req.params.id]
+    );
     if (!rows.length) return res.status(404).json({ message: 'Not found' });
     res.json(rows[0]);
-  } catch (err) {
-    console.error('GET /properties/:id error', err);
+  } catch {
     res.status(500).json({ message: 'Database error' });
   }
 });
 
-// POST inquiry (public)
+// ---------------- INQUIRIES ----------------
 app.post('/inquiries', async (req, res) => {
   try {
     const {
-      name,
-      email,
-      phone,
-      preferred_contact,
-      message,
-      propertyId,
-      property_name
+      name, email, phone,
+      preferred_contact, message,
+      propertyId, property_name
     } = req.body;
 
     let house = property_name || null;
     if (!house && propertyId) {
-      try {
-        const [pRows] = await db.query('SELECT title FROM properties WHERE id = ?', [propertyId]);
-        if (pRows && pRows.length) house = pRows[0].title;
-      } catch (e) {}
+      const [p] = await db.query(
+        'SELECT title FROM properties WHERE id = ?', [propertyId]
+      );
+      if (p.length) house = p[0].title;
     }
 
-    const sql = `INSERT INTO inquiries (name, email, phone, house, preferred_contact, message, status)
-                 VALUES (?, ?, ?, ?, ?, ?, 'NEW')`;
+    const [result] = await db.query(
+      `INSERT INTO inquiries
+       (name, email, phone, house, preferred_contact, message, status)
+       VALUES (?, ?, ?, ?, ?, ?, 'NEW')`,
+      [name, email, phone, house, preferred_contact, message]
+    );
 
-    const [result] = await db.query(sql, [
-      name || null,
-      email || null,
-      phone || null,
-      house || null,
-      preferred_contact || null,
-      message || null
-    ]);
-
-    return res.json({ message: 'Inquiry saved successfully', inquiryId: result.insertId });
+    res.json({ message: 'Inquiry saved', inquiryId: result.insertId });
   } catch (err) {
-    console.error('POST /inquiries error:', err);
-    return res.status(500).json({ message: 'Database error' });
+    console.error(err);
+    res.status(500).json({ message: 'Database error' });
   }
 });
 
-/* ---------------- AUTH (admin login) ---------------- */
+// ---------------- ADMIN LOGIN ----------------
 app.post('/admin/login', async (req, res) => {
   try {
     const { username, password } = req.body;
-    const [rows] = await db.query('SELECT * FROM admin_users WHERE username = ?', [username]);
+    const [rows] = await db.query(
+      'SELECT * FROM admin_users WHERE username = ?', [username]
+    );
+
+    if (!rows.length) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
+
     const admin = rows[0];
-    if (!admin) return res.status(401).json({ error: 'Invalid credentials' });
+    const valid = await bcrypt.compare(password, admin.password);
+    if (!valid) {
+      return res.status(401).json({ error: 'Invalid credentials' });
+    }
 
-    let valid = false;
-    try { valid = await bcrypt.compare(password, admin.password); } catch (e) { valid = (password === admin.password); }
-    if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
+    const token = jwt.sign(
+      { id: admin.id, username: admin.username },
+      JWT_SECRET,
+      { expiresIn: '8h' }
+    );
 
-    const token = jwt.sign({ id: admin.id, username: admin.username }, JWT_SECRET, { expiresIn: '8h' });
     res.json({ token });
   } catch (err) {
-    console.error('POST /admin/login error', err);
+    console.error(err);
     res.status(500).json({ error: 'DB error' });
   }
 });
 
-/* ---------------- ADMIN: properties add/update/delete ---------------- */
+// ---------------- PROPERTIES (ALIGNED IMAGE HANDLING) ----------------
+
+// ADD PROPERTY
 app.post('/properties', authMiddleware, upload.array('images', 10), async (req, res) => {
   try {
+    let imageUrls = [];
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        try {
+          const result = await cloudinary.uploader.upload(file.path, {
+            folder: 'properties'
+          });
+
+          imageUrls.push(result.secure_url);
+
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+        } catch (uploadErr) {
+          console.error('Image upload failed:', uploadErr);
+
+          if (fs.existsSync(file.path)) {
+            fs.unlinkSync(file.path);
+          }
+
+          return res.status(500).json({
+            message: 'Image upload failed. Property not saved.'
+          });
+        }
+      }
+    }
+
     const {
       title, location, price, description,
       room_type, student_types, funding_options,
       deposit_type, deposit_amount, rooms_available
     } = req.body;
 
-    const imageUrls = (req.files || []).map(f => f.path).join(',');
-
     const [result] = await db.query(
       `INSERT INTO properties
-      (title, location, price, description, images, room_type, student_types, funding_options,
-       deposit_type, deposit_amount, rooms_available)
+      (title, location, price, description, images, room_type, student_types,
+       funding_options, deposit_type, deposit_amount, rooms_available)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         title || null,
         location || null,
         (price && price !== '') ? price : null,
         description || null,
-        imageUrls || null,
+        imageUrls.join(',') || null,
         room_type || null,
         student_types || null,
         funding_options || null,
@@ -173,116 +209,102 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
 
     res.json({ message: 'Property added', propertyId: result.insertId });
   } catch (err) {
-    console.error('POST /properties error', err);
+    console.error(err);
     res.status(500).json({ message: 'Database error' });
   }
 });
 
+// UPDATE PROPERTY
 app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
   try {
     const id = req.params.id;
-    const [existingRows] = await db.query('SELECT * FROM properties WHERE id = ?', [id]);
-    if (!existingRows.length) return res.status(404).json({ message: 'Property not found' });
-    const existing = existingRows[0];
+    const [rows] = await db.query(
+      'SELECT * FROM properties WHERE id = ?', [id]
+    );
+    if (!rows.length) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
 
-    const {
-      title, location, price, description,
-      room_type, student_types, funding_options,
-      deposit_type, deposit_amount, rooms_available
-    } = req.body;
+    const existing = rows[0];
+    let imageUrls = [];
 
-    const newFiles = (req.files || []).map(f => f.path).join(',');
-    const imagesToSave = newFiles ? newFiles : existing.images;
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const result = await cloudinary.uploader.upload(file.path, {
+          folder: 'properties'
+        });
+
+        imageUrls.push(result.secure_url);
+
+        if (fs.existsSync(file.path)) {
+          fs.unlinkSync(file.path);
+        }
+      }
+    }
+
+    const imagesToSave = imageUrls.length
+      ? imageUrls.join(',')
+      : existing.images;
 
     await db.query(
       `UPDATE properties SET
         title=?, location=?, price=?, description=?, images=?,
         room_type=?, student_types=?, funding_options=?,
         deposit_type=?, deposit_amount=?, rooms_available=?
-       WHERE id = ?`,
+       WHERE id=?`,
       [
-        title || existing.title,
-        location || existing.location,
-        (price && price !== '') ? price : existing.price,
-        description || existing.description,
-        imagesToSave || null,
-        room_type || existing.room_type,
-        student_types || existing.student_types,
-        funding_options || existing.funding_options,
-        deposit_type || existing.deposit_type,
-        deposit_type === 'YES' ? deposit_amount : null,
-        rooms_available || existing.rooms_available,
+        req.body.title || existing.title,
+        req.body.location || existing.location,
+        (req.body.price && req.body.price !== '') ? req.body.price : existing.price,
+        req.body.description || existing.description,
+        imagesToSave,
+        req.body.room_type || existing.room_type,
+        req.body.student_types || existing.student_types,
+        req.body.funding_options || existing.funding_options,
+        req.body.deposit_type || existing.deposit_type,
+        req.body.deposit_type === 'YES'
+          ? req.body.deposit_amount
+          : null,
+        req.body.rooms_available || existing.rooms_available,
         id
       ]
     );
 
     res.json({ message: 'Property updated' });
   } catch (err) {
-    console.error('PUT /properties/:id error', err);
+    console.error(err);
     res.status(500).json({ message: 'Database error' });
   }
 });
 
-app.delete('/properties/:id', authMiddleware, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const [rows] = await db.query('SELECT images FROM properties WHERE id = ?', [id]);
-    if (!rows.length) return res.status(404).json({ message: 'Property not found' });
-    const images = rows[0].images;
-    // NOTE: Since images are on Cloudinary, we could optionally delete them from Cloudinary here
-    await db.query('DELETE FROM properties WHERE id = ?', [id]);
-    res.json({ message: 'Property deleted' });
-  } catch (err) {
-    console.error('DELETE /properties/:id error', err);
-    res.status(500).json({ message: 'Database error' });
-  }
-});
-
-/* ---------------- ADMIN: inquiries ---------------- */
+// ---------------- ADMIN INQUIRIES ----------------
 app.get('/admin/inquiries', authMiddleware, async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT * FROM inquiries ORDER BY id DESC');
-    res.json(rows);
-  } catch (err) {
-    console.error('GET /admin/inquiries error', err);
-    res.status(500).json({ message: 'Database error' });
-  }
+  const [rows] = await db.query(
+    'SELECT * FROM inquiries ORDER BY id DESC'
+  );
+  res.json(rows);
 });
 
 app.put('/admin/inquiries/:id', authMiddleware, async (req, res) => {
-  try {
-    const id = req.params.id;
-    const { status } = req.body;
-    await db.query('UPDATE inquiries SET status = ? WHERE id = ?', [status, id]);
-    res.json({ message: 'Status updated' });
-  } catch (err) {
-    console.error('PUT /admin/inquiries/:id error', err);
-    res.status(500).json({ message: 'Database error' });
-  }
+  await db.query(
+    'UPDATE inquiries SET status=? WHERE id=?',
+    [req.body.status, req.params.id]
+  );
+  res.json({ message: 'Status updated' });
 });
 
 app.delete('/admin/inquiries/:id', authMiddleware, async (req, res) => {
-  try {
-    const id = req.params.id;
-
-    const [result] = await db.query(
-      'DELETE FROM inquiries WHERE id = ?',
-      [id]
-    );
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Inquiry not found' });
-    }
-
-    res.json({ message: 'Inquiry deleted successfully' });
-  } catch (err) {
-    console.error('DELETE /admin/inquiries/:id error', err);
-    res.status(500).json({ message: 'Database error' });
-  }
+  await db.query(
+    'DELETE FROM inquiries WHERE id=?',
+    [req.params.id]
+  );
+  res.json({ message: 'Inquiry deleted' });
 });
 
-// fallback for everything else
+// ---------------- FALLBACK ----------------
 app.use((req, res) => res.status(404).send('Not found'));
 
 const PORT = Number(process.env.PORT || 4000);
-app.listen(PORT, () => console.log(`🚀 Server listening on ${PORT}`));
+app.listen(PORT, () =>
+  console.log(`🚀 Server listening on ${PORT}`)
+);
