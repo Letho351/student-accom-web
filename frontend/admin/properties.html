@@ -4,15 +4,16 @@
   <meta charset="utf-8" />
   <title>Admin — Properties</title>
   <link rel="stylesheet" href="/css/style.css" />
-
 </head>
 <body>
+
   <script>
     if (!localStorage.getItem("admin_token")) location.href = '/admin-login.html';
   </script>
 
   <div class="container">
     <h1>Properties</h1>
+
     <div class="admin-wrap">
       <aside class="admin-sidebar">
         <strong>Menu</strong>
@@ -20,17 +21,24 @@
         <div class="menu-item active" data-href="properties.html">Properties</div>
         <div class="menu-item" data-href="inquiries.html">Student Inquiries</div>
         <div class="menu-item" data-href="settings.html">Settings</div>
-        <div style="margin-top:12px"><button onclick="logout()">Logout</button></div>
+        <div style="margin-top:12px">
+          <button onclick="logout()">Logout</button>
+        </div>
       </aside>
 
       <main class="admin-main">
-        <!-- Add / Edit form -->
+
+        <!-- Add / Edit Property Form -->
         <div id="formArea" style="margin-bottom:18px;">
           <h3 id="formTitle">Add Property</h3>
 
-          <div style="max-width:800px;">
+          <!-- 🔥 REAL FORM (IMPORTANT) -->
+          <form id="propertyForm" style="max-width:800px;" enctype="multipart/form-data">
+
             <input id="title" placeholder="Title" />
+
             <input id="location" placeholder="Location" />
+
             <div class="form-row">
               <input id="price" placeholder="Price (numbers only)" />
               <select id="room_type">
@@ -63,21 +71,23 @@
               </select>
               <input id="deposit_amount" placeholder="Deposit Amount (R)" />
             </div>
-            <input id="rooms_available" placeholder="Rooms Available" type="number" />
+
+            <input id="rooms_available" type="number" placeholder="Rooms Available" />
 
             <label>Upload images (you can choose multiple)</label>
-            <input id="images" type="file" multiple />
+            <!-- 🔥 NAME MUST MATCH upload.array('images') -->
+            <input id="images" name="images" type="file" multiple accept="image/*" />
 
             <div style="margin-top:10px;">
-              <button id="saveBtn">Save</button>
-              <button id="cancelBtn" class="muted">Cancel</button>
+              <button id="saveBtn" type="submit">Save</button>
+              <button id="cancelBtn" type="button" class="muted">Cancel</button>
             </div>
 
             <p id="propMsg"></p>
-          </div>
+          </form>
         </div>
 
-        <!-- List of properties -->
+        <!-- Properties List -->
         <div id="listArea"></div>
 
       </main>
@@ -85,5 +95,23 @@
   </div>
 
   <script src="admin.js"></script>
+
+  <!-- 🔥 Prevent browser submit + keep files intact -->
+  <script>
+    const form = document.getElementById('propertyForm');
+    if (form) {
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        saveProperty();
+      });
+    }
+
+    document.getElementById('cancelBtn')?.addEventListener('click', () => {
+      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('propertyForm').reset();
+      window.editPropertyId = null;
+    });
+  </script>
+
 </body>
 </html>
