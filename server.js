@@ -165,6 +165,18 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
   res.json({ message: 'Property added', propertyId: result.insertId });
 });
 
+// 🔒 ANTI-DUPLICATE CHECK (ADD THIS)
+  const [exists] = await db.query(
+    'SELECT id FROM properties WHERE title = ? AND location = ? LIMIT 1',
+    [title, location]
+  );
+
+  if (exists.length) {
+    return res.status(409).json({
+      message: 'This property already exists'
+    });
+  }
+
 // ---------------- DELETE PROPERTY (FIX) ----------------
 app.delete('/properties/:id', authMiddleware, async (req, res) => {
   const id = req.params.id;
