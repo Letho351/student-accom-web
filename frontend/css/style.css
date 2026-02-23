@@ -169,63 +169,97 @@ form label{ display:block; margin-top:12px; font-weight:600; color:var(--muted) 
 }
 
 /* =========================
-   ADMIN LOGIN PAGE STYLING
+   ADMIN LOGIN PAGE STYLING (MODERN)
 ========================= */
+
 .admin-login-body{
   display:flex;
   justify-content:center;
   align-items:center;
   min-height:100vh;
-  background:linear-gradient(135deg, #0b6e4f, #34a87f);
+  background:radial-gradient(circle at top, #020617, #000);
+  overflow:hidden;
+}
+
+.admin-login-body::before{
+  content:"";
+  position:absolute;
+  width:480px;
+  height:480px;
+  background:radial-gradient(circle, #22c55e44, transparent 70%);
+  filter:blur(90px);
+  animation:floatGlow 7s infinite alternate ease-in-out;
+}
+
+@keyframes floatGlow{
+  from{transform:translateY(0)}
+  to{transform:translateY(-45px)}
 }
 
 .login-container{
-  background:#fff;
-  padding:40px 36px;
-  border-radius:14px;
-  box-shadow:0 15px 35px rgba(0,0,0,0.18);
-  width:340px;
+  position:relative;
+  background:rgba(17,24,39,.96);
+  padding:42px 38px;
+  border-radius:16px;
+  width:360px;
   text-align:center;
-  animation:fadeIn .4s ease;
+  box-shadow:0 20px 60px rgba(0,0,0,.55);
+  animation:fadeUp .6s ease;
+}
+
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
 }
 
 .login-container h2{
-  margin-bottom:24px;
-  color:#0b6e4f;
+  margin-bottom:26px;
+  color:#fff;
   font-size:24px;
+  font-weight:600;
 }
 
 .login-container input{
   width:100%;
-  padding:12px 14px;
+  padding:13px 14px;
   margin-bottom:16px;
-  border-radius:8px;
-  border:1px solid #e4e6ef;
-  font-size:14px;
+  border-radius:10px;
+  border:1px solid #1f2937;
+  background:#020617;
+  color:#fff;
+  outline:none;
+  transition:.25s;
+}
+
+.login-container input:focus{
+  border-color:#22c55e;
+  box-shadow:0 0 0 3px #22c55e22;
 }
 
 .login-container button{
   width:100%;
-  padding:12px;
-  background:#0b6e4f;
-  color:#fff;
+  padding:13px;
+  background:linear-gradient(135deg,#22c55e,#16a34a);
+  color:#020617;
   border:none;
-  border-radius:8px;
-  font-size:16px;
+  border-radius:10px;
+  font-size:15px;
+  font-weight:600;
   cursor:pointer;
-  transition:all .2s;
+  transition:.3s;
 }
+
 .login-container button:hover{
-  background:#34a87f;
+  transform:translateY(-2px);
+  box-shadow:0 12px 30px #22c55e33;
+}
+
+.login-container button:active{
+  transform:scale(.98);
 }
 
 #msg{
   margin-top:14px;
-  font-size:14px;
-  color:red;
-}
-
-@keyframes fadeIn{
-  from{opacity:0; transform:translateY(10px);}
-  to{opacity:1; transform:translateY(0);}
+  font-size:13px;
+  color:#ef4444;
 }
