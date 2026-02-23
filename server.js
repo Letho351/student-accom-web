@@ -75,6 +75,25 @@ app.get('/properties/:id', async (req, res) => {
   res.json(rows[0]);
 });
 
+// ---------------- 🔒 DUPLICATE CHECK ENDPOINT ----------------
+app.post('/admin/properties/check-duplicate', authMiddleware, async (req, res) => {
+  const { title, location, rooms_available } = req.body;
+
+  if (!title || !location || !rooms_available) {
+    return res.json({ exists: false });
+  }
+
+  const [rows] = await db.query(
+    `SELECT id FROM properties 
+     WHERE LOWER(title)=LOWER(?) 
+       AND LOWER(location)=LOWER(?) 
+       AND rooms_available=?`,
+    [title.trim(), location.trim(), rooms_available]
+  );
+
+  res.json({ exists: rows.length > 0 });
+});
+
 // ---------------- INQUIRIES ----------------
 app.post('/inquiries', async (req, res) => {
   const {
@@ -122,8 +141,24 @@ app.post('/admin/login', async (req, res) => {
   res.json({ token });
 });
 
-// ---------------- ADD PROPERTY ----------------
+// ---------------- ADD PROPERTY (WITH DUP CHECK) ----------------
 app.post('/properties', authMiddleware, upload.array('images', 10), async (req, res) => {
+
+  const { title, location, rooms_available } = req.body;
+
+  // 🔒 BACKEND DUPLICATE BLOCK
+  const [dup] = await db.query(
+    `SELECT id FROM properties 
+     WHERE LOWER(title)=LOWER(?) 
+       AND LOWER(location)=LOWER(?) 
+       AND rooms_available=?`,
+    [title?.trim(), location?.trim(), rooms_available]
+  );
+
+  if (dup.length) {
+    return res.status(409).json({ message: 'Property already exists' });
+  }
+
   let imageUrls = [];
 
   if (req.files?.length) {
@@ -137,9 +172,9 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
   }
 
   const {
-    title, location, price, description,
+    price, description,
     room_type, student_types, funding_options,
-    deposit_type, deposit_amount, rooms_available
+    deposit_type, deposit_amount
   } = req.body;
 
   const [result] = await db.query(
@@ -165,7 +200,7 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
   res.json({ message: 'Property added', propertyId: result.insertId });
 });
 
-// ---------------- DELETE PROPERTY (FIX) ----------------
+// ---------------- DELETE PROPERTY ----------------
 app.delete('/properties/:id', authMiddleware, async (req, res) => {
   const id = req.params.id;
 
@@ -176,7 +211,6 @@ app.delete('/properties/:id', authMiddleware, async (req, res) => {
     return res.status(404).json({ message: 'Property not found' });
   }
 
-  // delete images from cloudinary
   if (rows[0].images) {
     const images = rows[0].images.split(',');
     for (const url of images) {
@@ -186,7 +220,6 @@ app.delete('/properties/:id', authMiddleware, async (req, res) => {
   }
 
   await db.query('DELETE FROM properties WHERE id = ?', [id]);
-
   res.json({ message: 'Property deleted' });
 });
 

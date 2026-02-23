@@ -28,55 +28,60 @@
 
       <main class="admin-main">
 
-        <!-- Add / Edit Property Form -->
         <div id="formArea" style="margin-bottom:18px;">
           <h3 id="formTitle">Add Property</h3>
 
-          <!-- 🔥 REAL FORM (IMPORTANT) -->
           <form id="propertyForm" style="max-width:800px;" enctype="multipart/form-data">
 
-            <input id="title" placeholder="Title" />
+            <label for="title">Title</label>
+            <input id="title" name="title" placeholder="Title" required />
 
-            <input id="location" placeholder="Location" />
+            <label for="location">Location</label>
+            <input id="location" name="location" placeholder="Location" required />
 
             <div class="form-row">
-              <input id="price" placeholder="Price (numbers only)" />
-              <select id="room_type">
+              <input id="price" name="price" type="number" min="0" placeholder="Price (R)" required />
+
+              <select id="room_type" name="room_type" required>
                 <option value="">Room type</option>
-                <option>Single</option>
-                <option>Sharing</option>
+                <option value="Single">Single</option>
+                <option value="Sharing">Sharing</option>
               </select>
             </div>
 
-            <label>Student types (hold Ctrl/Cmd to multi-select)</label>
-            <select id="student_types" multiple size="4">
-              <option>VUT</option>
-              <option>NWU</option>
-              <option>Sedibeng</option>
+            <label for="student_types">Student types (hold Ctrl/Cmd to multi-select)</label>
+            <select id="student_types" name="student_types" multiple size="4" required>
+              <option value="VUT">VUT</option>
+              <option value="NWU">NWU</option>
+              <option value="Sedibeng">Sedibeng</option>
             </select>
 
-            <label>Funding options (hold Ctrl/Cmd to multi-select)</label>
-            <select id="funding_options" multiple size="3">
-              <option>Self-funded</option>
-              <option>Bursary</option>
+            <label for="funding_options">Funding options (hold Ctrl/Cmd to multi-select)</label>
+            <select id="funding_options" name="funding_options" multiple size="3">
+              <option value="Self-funded">Self-funded</option>
+              <option value="Bursary">Bursary</option>
             </select>
 
-            <textarea id="description" placeholder="Description"></textarea>
+            <label for="description">Description</label>
+            <textarea id="description" name="description" placeholder="Description"></textarea>
 
             <label>Deposit & Rooms</label>
             <div class="form-row">
-              <select id="deposit_type">
+              <select id="deposit_type" name="deposit_type">
                 <option value="NO">No Deposit</option>
                 <option value="YES">Deposit Required</option>
               </select>
-              <input id="deposit_amount" placeholder="Deposit Amount (R)" />
+
+              <input id="deposit_amount" name="deposit_amount" type="number" min="0" placeholder="Deposit Amount (R)" />
             </div>
 
-            <input id="rooms_available" type="number" placeholder="Rooms Available" />
+            <input id="rooms_available" name="rooms_available" type="number" min="1" placeholder="Rooms Available" required />
 
-            <label>Upload images (you can choose multiple)</label>
-            <!-- 🔥 NAME MUST MATCH upload.array('images') -->
+            <label for="images">Upload images (you can choose multiple)</label>
             <input id="images" name="images" type="file" multiple accept="image/*" />
+
+            <!-- 🔒 DUPLICATE WARNING -->
+            <p id="dupWarning" style="color:red; display:none; margin-top:6px;"></p>
 
             <div style="margin-top:10px;">
               <button id="saveBtn" type="submit">Save</button>
@@ -87,7 +92,6 @@
           </form>
         </div>
 
-        <!-- Properties List -->
         <div id="listArea"></div>
 
       </main>
@@ -96,9 +100,9 @@
 
   <script src="admin.js"></script>
 
-  <!-- 🔥 Prevent browser submit + keep files intact -->
   <script>
     const form = document.getElementById('propertyForm');
+
     if (form) {
       form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -109,6 +113,7 @@
     document.getElementById('cancelBtn')?.addEventListener('click', () => {
       document.getElementById('formArea').style.display = 'none';
       document.getElementById('propertyForm').reset();
+      document.getElementById('dupWarning').style.display = 'none';
       window.editPropertyId = null;
     });
   </script>

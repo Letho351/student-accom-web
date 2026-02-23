@@ -18,6 +18,57 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// ---------------- 🔒 LIVE DUPLICATE CHECK ----------------
+async function checkDuplicateProperty() {
+  const title = document.getElementById('title')?.value;
+  const location = document.getElementById('location')?.value;
+  const rooms = document.getElementById('rooms_available')?.value;
+  const warn = document.getElementById('dupWarning');
+  const btn = document.getElementById('saveBtn');
+  const token = TOKEN();
+
+  if (!title || !location || !rooms || !token) {
+    if (warn) warn.style.display = 'none';
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  try {
+    const res = await fetch('/admin/properties/check-duplicate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer ' + token
+      },
+      body: JSON.stringify({
+        title,
+        location,
+        rooms_available: rooms
+      })
+    });
+
+    const data = await res.json();
+
+    if (data.exists && !window.editPropertyId) {
+      warn.style.display = 'block';
+      warn.innerText = 'Property already exists';
+      btn.disabled = true;
+    } else {
+      warn.style.display = 'none';
+      btn.disabled = false;
+    }
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// listen while typing
+['title', 'location', 'rooms_available'].forEach(id => {
+  document.addEventListener('input', (e) => {
+    if (e.target.id === id) checkDuplicateProperty();
+  });
+});
+
 // ---------------- Properties management ----------------
 window.loadAdminProperties = async () => {
   try {
@@ -60,9 +111,13 @@ window.loadAdminProperties = async () => {
         document.getElementById('deposit_amount').value = p.deposit_amount || '';
         document.getElementById('rooms_available').value = p.rooms_available || '';
         const stSel = document.getElementById('student_types');
-        Array.from(stSel.options).forEach(opt => opt.selected = p.student_types?.split(',').map(s => s.trim()).includes(opt.text));
+        Array.from(stSel.options).forEach(opt =>
+          opt.selected = p.student_types?.split(',').map(s => s.trim()).includes(opt.text)
+        );
         const fSel = document.getElementById('funding_options');
-        Array.from(fSel.options).forEach(opt => opt.selected = p.funding_options?.split(',').map(s => s.trim()).includes(opt.text));
+        Array.from(fSel.options).forEach(opt =>
+          opt.selected = p.funding_options?.split(',').map(s => s.trim()).includes(opt.text)
+        );
       });
     });
 
@@ -73,7 +128,10 @@ window.loadAdminProperties = async () => {
         const id = b.dataset.id;
         const token = TOKEN();
         if (!token) return alert('Not logged in');
-        const resp = await fetch(`/properties/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token }});
+        const resp = await fetch(`/properties/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: 'Bearer ' + token }
+        });
         if (resp.ok) loadAdminProperties();
         else alert('Delete failed');
       });
@@ -104,17 +162,30 @@ async function saveProperty() {
   const f = Array.from(document.getElementById('funding_options').selectedOptions).map(o => o.text).join(',');
   fd.append('funding_options', f);
 
-  // Append files with name "images" to match server upload.array('images')
   const files = document.getElementById('images').files;
   for (let i = 0; i < files.length; i++) fd.append('images', files[i]);
 
   try {
     let res;
     if (window.editPropertyId) {
-      res = await fetch(`/properties/${window.editPropertyId}`, { method: 'PUT', headers: { Authorization: 'Bearer ' + token }, body: fd });
+      res = await fetch(`/properties/${window.editPropertyId}`, {
+        method: 'PUT',
+        headers: { Authorization: 'Bearer ' + token },
+        body: fd
+      });
     } else {
-      res = await fetch('/properties', { method: 'POST', headers: { Authorization: 'Bearer ' + token }, body: fd });
+      res = await fetch('/properties', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token },
+        body: fd
+      });
     }
+
+    if (res.status === 409) {
+      document.getElementById('propMsg').innerText = 'Property already exists';
+      return;
+    }
+
     const data = await res.json();
     document.getElementById('propMsg').innerText = data.message || (res.ok ? 'Saved' : 'Error');
     document.getElementById('formArea').style.display = 'none';
@@ -140,7 +211,9 @@ window.loadAdminInquiries = async () => {
   }
 
   try {
-    const res = await fetch('/admin/inquiries', { headers: { Authorization: 'Bearer ' + token }});
+    const res = await fetch('/admin/inquiries', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
     if (!res.ok) throw new Error('Failed to fetch inquiries');
     const list = await res.json();
 
@@ -170,39 +243,8 @@ window.loadAdminInquiries = async () => {
       `;
       container.appendChild(card);
     });
-
-    // save status buttons
-    document.querySelectorAll('.saveStatusBtn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const id = btn.dataset.id;
-        const sel = document.querySelector(`select[data-id="${id}"]`);
-        const status = sel.value;
-        await fetch(`/admin/inquiries/${id}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token },
-          body: JSON.stringify({ status })
-        });
-        btn.innerText = 'Saved';
-        setTimeout(() => btn.innerText = 'Save', 1000);
-        await loadAdminInquiries();
-      });
-    });
-
-    // delete inquiry buttons
-    document.querySelectorAll('.delInquiryBtn').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Delete this inquiry?')) return;
-        const id = btn.dataset.id;
-        const res = await fetch(`/admin/inquiries/${id}`, { method: 'DELETE', headers: { Authorization: 'Bearer ' + token }});
-        if (res.ok) await loadAdminInquiries();
-        else alert('Delete failed');
-      });
-    });
-
   } catch (err) {
     console.error(err);
-    const container = document.getElementById('inqList');
-    if (container) container.innerText = 'Failed to load inquiries';
   }
 };
 
@@ -211,7 +253,9 @@ window.loadOverview = async () => {
   const token = TOKEN();
   if (!token) return;
   try {
-    const res = await fetch('/admin/inquiries', { headers: { Authorization: 'Bearer ' + token }});
+    const res = await fetch('/admin/inquiries', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
     if (!res.ok) return;
     const list = await res.json();
     const el = document.getElementById('overview');
