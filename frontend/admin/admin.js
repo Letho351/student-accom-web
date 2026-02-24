@@ -92,7 +92,6 @@ window.loadAdminProperties = async () => {
       table.appendChild(tr);
     });
 
-    // edit handlers
     document.querySelectorAll('.editBtn').forEach(b => {
       b.addEventListener('click', async () => {
         const id = b.dataset.id;
@@ -100,8 +99,10 @@ window.loadAdminProperties = async () => {
         if (!r.ok) return alert('Failed to load property');
         const p = await r.json();
         window.editPropertyId = id;
+
         document.getElementById('formArea').style.display = 'block';
         document.getElementById('formTitle').innerText = 'Edit Property';
+
         document.getElementById('title').value = p.title || '';
         document.getElementById('location').value = p.location || '';
         document.getElementById('price').value = p.price || '';
@@ -110,10 +111,23 @@ window.loadAdminProperties = async () => {
         document.getElementById('deposit_type').value = p.deposit_type || 'NO';
         document.getElementById('deposit_amount').value = p.deposit_amount || '';
         document.getElementById('rooms_available').value = p.rooms_available || '';
+
+        document.getElementById('distance_km').value = p.distance_km || '';
+        document.getElementById('walking_time').value = p.walking_time || '';
+        document.getElementById('lease_term').value = p.lease_term || '10';
+        document.getElementById('six_month_rooms').value = p.six_month_rooms || '';
+
+        restoreCheckbox('transport', p.transport);
+        restoreCheckbox('security', p.security);
+        restoreCheckbox('amenities', p.amenities);
+        restoreCheckbox('utilities', p.utilities);
+        restoreCheckbox('room_includes', p.room_includes);
+
         const stSel = document.getElementById('student_types');
         Array.from(stSel.options).forEach(opt =>
           opt.selected = p.student_types?.split(',').map(s => s.trim()).includes(opt.text)
         );
+
         const fSel = document.getElementById('funding_options');
         Array.from(fSel.options).forEach(opt =>
           opt.selected = p.funding_options?.split(',').map(s => s.trim()).includes(opt.text)
@@ -121,7 +135,6 @@ window.loadAdminProperties = async () => {
       });
     });
 
-    // delete handlers
     document.querySelectorAll('.delBtn').forEach(b => {
       b.addEventListener('click', async () => {
         if (!confirm('Delete property?')) return;
@@ -138,135 +151,74 @@ window.loadAdminProperties = async () => {
     });
   } catch (err) {
     console.error(err);
-    const area = document.getElementById('listArea');
-    if (area) area.innerText = 'Failed to load properties';
   }
 };
 
-// Save (add or update) property
+// Save property
 async function saveProperty() {
   const token = TOKEN();
   if (!token) return alert('You must be logged in');
-  const fd = new FormData();
-  fd.append('title', document.getElementById('title').value);
-  fd.append('location', document.getElementById('location').value);
-  fd.append('price', document.getElementById('price').value);
-  fd.append('description', document.getElementById('description').value);
-  fd.append('room_type', document.getElementById('room_type').value);
-  fd.append('deposit_type', document.getElementById('deposit_type').value);
-  fd.append('deposit_amount', document.getElementById('deposit_amount').value);
-  fd.append('rooms_available', document.getElementById('rooms_available').value);
 
-  const st = Array.from(document.getElementById('student_types').selectedOptions).map(o => o.text).join(',');
-  fd.append('student_types', st);
-  const f = Array.from(document.getElementById('funding_options').selectedOptions).map(o => o.text).join(',');
-  fd.append('funding_options', f);
+  const fd = new FormData();
+
+  [
+    'title','location','price','description','room_type',
+    'deposit_type','deposit_amount','rooms_available',
+    'distance_km','walking_time','lease_term','six_month_rooms'
+  ].forEach(id => fd.append(id, document.getElementById(id)?.value || ''));
+
+  fd.append('student_types', collectSelect('student_types'));
+  fd.append('funding_options', collectSelect('funding_options'));
+
+  fd.append('transport', collectChecks('transport'));
+  fd.append('security', collectChecks('security'));
+  fd.append('amenities', collectChecks('amenities'));
+  fd.append('utilities', collectChecks('utilities'));
+  fd.append('room_includes', collectChecks('room_includes'));
 
   const files = document.getElementById('images').files;
   for (let i = 0; i < files.length; i++) fd.append('images', files[i]);
 
   try {
-    let res;
-    if (window.editPropertyId) {
-      res = await fetch(`/properties/${window.editPropertyId}`, {
-        method: 'PUT',
-        headers: { Authorization: 'Bearer ' + token },
-        body: fd
-      });
-    } else {
-      res = await fetch('/properties', {
-        method: 'POST',
-        headers: { Authorization: 'Bearer ' + token },
-        body: fd
-      });
-    }
+    const url = window.editPropertyId ? `/properties/${window.editPropertyId}` : '/properties';
+    const method = window.editPropertyId ? 'PUT' : 'POST';
 
-    if (res.status === 409) {
-      document.getElementById('propMsg').innerText = 'Property already exists';
-      return;
-    }
+    const res = await fetch(url, {
+      method,
+      headers: { Authorization: 'Bearer ' + token },
+      body: fd
+    });
 
     const data = await res.json();
     document.getElementById('propMsg').innerText = data.message || (res.ok ? 'Saved' : 'Error');
     document.getElementById('formArea').style.display = 'none';
     window.editPropertyId = null;
     loadAdminProperties();
+
   } catch (err) {
     console.error(err);
-    document.getElementById('propMsg').innerText = 'Error saving';
   }
 }
 
-document.addEventListener('click', (ev) => {
-  if (ev.target?.id === 'saveBtn') saveProperty();
-});
+// Helpers
+function collectChecks(name){
+  return [...document.querySelectorAll(`input[name="${name}"]:checked`)]
+          .map(x=>x.value).join(',');
+}
 
-// ---------------- Inquiries management ----------------
-window.loadAdminInquiries = async () => {
-  const token = TOKEN();
-  if (!token) {
-    const area = document.getElementById('inqList') || document.getElementById('listArea');
-    if (area) area.innerText = 'Not logged in';
-    return;
-  }
+function restoreCheckbox(name, val){
+  if(!val) return;
+  const arr = val.split(',').map(x=>x.trim());
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb=>{
+    cb.checked = arr.includes(cb.value);
+  });
+}
 
-  try {
-    const res = await fetch('/admin/inquiries', {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) throw new Error('Failed to fetch inquiries');
-    const list = await res.json();
+function collectSelect(id){
+  return [...document.getElementById(id).selectedOptions].map(o=>o.text).join(',');
+}
 
-    const container = document.getElementById('inqList');
-    container.innerHTML = '';
-    list.forEach(i => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.style.marginBottom = '8px';
-      card.innerHTML = `
-        <div style="padding:12px">
-          <div><strong>${i.name || '(no name)'}</strong> — <span class="small">${i.email || ''} • ${i.phone || ''}</span></div>
-          <div class="muted small">Property: ${i.house || ''} • ${i.created_at ? new Date(i.created_at).toLocaleString() : ''}</div>
-          <div style="margin-top:8px">${i.message || ''}</div>
-          <div style="margin-top:8px">
-            <select data-id="${i.id}" class="statusSel">
-              <option ${i.status==='New'?'selected':''}>New</option>
-              <option ${i.status==='CONTACTED'?'selected':''}>CONTACTED</option>
-              <option ${i.status==='VIEWING SCHEDULED'?'selected':''}>VIEWING SCHEDULED</option>
-              <option ${i.status==='PLACED'?'selected':''}>PLACED</option>
-              <option ${i.status==='LOST'?'selected':''}>LOST</option>
-            </select>
-            <button data-id="${i.id}" class="saveStatusBtn">Save</button>
-            <button data-id="${i.id}" class="delInquiryBtn">Delete</button>
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  } catch (err) {
-    console.error(err);
-  }
-};
-
-// ---------------- Overview ----------------
-window.loadOverview = async () => {
-  const token = TOKEN();
-  if (!token) return;
-  try {
-    const res = await fetch('/admin/inquiries', {
-      headers: { Authorization: 'Bearer ' + token }
-    });
-    if (!res.ok) return;
-    const list = await res.json();
-    const el = document.getElementById('overview');
-    if (el) el.innerText = `Total inquiries: ${list.length} • New: ${list.filter(i => i.status === 'New').length}`;
-  } catch (err) {
-    console.error(err);
-  }
-};
-
+// ---------------- INIT ----------------
 window.addEventListener('DOMContentLoaded', () => {
-  if (document.getElementById('overview')) loadOverview();
   if (document.getElementById('listArea')) loadAdminProperties();
-  if (document.getElementById('inqList')) loadAdminInquiries();
 });

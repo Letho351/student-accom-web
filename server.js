@@ -141,7 +141,7 @@ app.post('/admin/login', async (req, res) => {
   res.json({ token });
 });
 
-// ---------------- ADD PROPERTY (WITH DUP CHECK) ----------------
+// ---------------- ADD PROPERTY (WITH FULL EXTENDED FIELDS) ----------------
 app.post('/properties', authMiddleware, upload.array('images', 10), async (req, res) => {
 
   const { title, location, rooms_available } = req.body;
@@ -174,14 +174,21 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
   const {
     price, description,
     room_type, student_types, funding_options,
-    deposit_type, deposit_amount
+    deposit_type, deposit_amount,
+    distance_from_campus, walking_time,
+    transport_options, security_features,
+    amenities, utilities,
+    lease_terms, room_includes,
+    max_lease_months
   } = req.body;
 
   const [result] = await db.query(
     `INSERT INTO properties
      (title, location, price, description, images, room_type, student_types,
-      funding_options, deposit_type, deposit_amount, rooms_available)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      funding_options, deposit_type, deposit_amount, rooms_available,
+      distance_from_campus, walking_time, transport_options, security_features,
+      amenities, utilities, lease_terms, room_includes, max_lease_months)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       title || null,
       location || null,
@@ -193,7 +200,16 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
       funding_options || null,
       deposit_type || 'NO',
       deposit_type === 'YES' ? deposit_amount : null,
-      rooms_available || null
+      rooms_available || null,
+      distance_from_campus || null,
+      walking_time || null,
+      transport_options || null,
+      security_features || null,
+      amenities || null,
+      utilities || null,
+      lease_terms || null,
+      room_includes || null,
+      max_lease_months || null
     ]
   );
 
