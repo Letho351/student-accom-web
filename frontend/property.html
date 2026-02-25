@@ -74,7 +74,11 @@ const id = qs.get('id');
 function tagList(target, data) {
   const el = document.getElementById(target);
   el.innerHTML = '';
-  if (!data || data.length === 0) return;
+
+  if (!data || data.length === 0) {
+    el.innerHTML = "<p class='muted'>Not specified</p>";
+    return;
+  }
 
   let list = [];
 
@@ -111,6 +115,7 @@ async function loadProperty() {
     if (!res.ok) throw new Error();
     const p = await res.json();
 
+    /* ---------- Gallery ---------- */
     const images = p.images ? p.images.split(',') : [];
     const gallery = document.getElementById('gallery');
     gallery.innerHTML = '';
@@ -135,11 +140,13 @@ async function loadProperty() {
       gallery.appendChild(thumbs);
     }
 
+    /* ---------- Basic Info ---------- */
     document.getElementById('title').innerText = p.title || '';
     document.getElementById('meta').innerText = p.location || '';
     document.getElementById('price').innerText = p.price ? `R${p.price} / Month` : '';
     document.getElementById('desc').innerText = p.description || '';
 
+    /* ---------- Quick Info ---------- */
     const qi = document.getElementById('quickInfo');
     qi.innerHTML = '';
 
@@ -148,7 +155,8 @@ async function loadProperty() {
       ['Available For', p.student_types],
       ['Funding', p.funding_options],
       ['Deposit', p.deposit_type === 'YES' ? `R${p.deposit_amount}` : 'None'],
-      ['Rooms Available', p.rooms_available ? `We have ${p.rooms_available} rooms available for 6 month students` : null]
+      ['Rooms Available', p.rooms_available ? `${p.rooms_available} rooms available` : null],
+      ['6-Month Students', p.six_month_rooms ? `${p.six_month_rooms} rooms available` : null]
     ];
 
     quick.forEach(x => {
@@ -159,6 +167,7 @@ async function loadProperty() {
       qi.appendChild(d);
     });
 
+    /* ---------- Deep Details ---------- */
     const deep = document.getElementById('deepDetails');
     deep.innerHTML = '';
 
@@ -178,10 +187,12 @@ async function loadProperty() {
       deep.appendChild(d);
     });
 
+    /* ---------- Tags ---------- */
     tagList('amenities', [p.amenities, p.utilities].filter(Boolean).join(','));
-    tagList('security', p.security_features);
-    tagList('transport', p.transport_options);
+    tagList('security', p.security_features || '');
+    tagList('transport', p.transport_options || '');
 
+    /* ---------- Contact ---------- */
     document.getElementById('contactLink').href = `/inquiry.html?propertyId=${p.id}`;
 
   } catch (err) {
