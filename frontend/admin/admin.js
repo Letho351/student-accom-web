@@ -117,8 +117,8 @@ window.loadAdminProperties = async () => {
         document.getElementById('lease_term').value = p.lease_term || '10';
         document.getElementById('six_month_rooms').value = p.six_month_rooms || '';
 
-        restoreCheckbox('transport', p.transport);
-        restoreCheckbox('security', p.security);
+        restoreCheckbox('transport', p.transport_options);
+        restoreCheckbox('security', p.security_features);
         restoreCheckbox('amenities', p.amenities);
         restoreCheckbox('utilities', p.utilities);
         restoreCheckbox('room_includes', p.room_includes);
@@ -154,7 +154,7 @@ window.loadAdminProperties = async () => {
   }
 };
 
-// Save property
+// ---------------- SAVE PROPERTY (FIXED KEYS ONLY) ----------------
 async function saveProperty() {
   const token = TOKEN();
   if (!token) return alert('You must be logged in');
@@ -170,8 +170,10 @@ async function saveProperty() {
   fd.append('student_types', collectSelect('student_types'));
   fd.append('funding_options', collectSelect('funding_options'));
 
-  fd.append('transport', collectChecks('transport'));
-  fd.append('security', collectChecks('security'));
+  // ✅ FIXED FIELD NAMES
+  fd.append('transport_options', collectChecks('transport'));
+  fd.append('security_features', collectChecks('security'));
+
   fd.append('amenities', collectChecks('amenities'));
   fd.append('utilities', collectChecks('utilities'));
   fd.append('room_includes', collectChecks('room_includes'));
