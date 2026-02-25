@@ -34,28 +34,23 @@
       <p id="price"></p>
       <p id="desc"></p>
 
-      <!-- QUICK SCAN -->
       <div id="quickInfo" class="info-grid"></div>
 
-      <!-- DETAILS -->
       <div class="section">
         <h3>Accommodation Details</h3>
         <div id="deepDetails" class="info-grid"></div>
       </div>
 
-      <!-- AMENITIES -->
       <div class="section">
         <h3>Amenities & Utilities</h3>
         <div id="amenities" class="tag-list"></div>
       </div>
 
-      <!-- SECURITY -->
       <div class="section">
         <h3>Security Features</h3>
         <div id="security" class="tag-list"></div>
       </div>
 
-      <!-- TRANSPORT -->
       <div class="section">
         <h3>Transport Options</h3>
         <div id="transport" class="tag-list"></div>
@@ -79,9 +74,18 @@ const id = qs.get('id');
 function tagList(target, data) {
   const el = document.getElementById(target);
   el.innerHTML = '';
-  if (!data) return;
-  data.split(',').forEach(x => {
-    if (!x.trim()) return;
+  if (!data || data.length === 0) return;
+
+  let list = [];
+
+  if (Array.isArray(data)) {
+    list = data;
+  } else {
+    list = data.split(',');
+  }
+
+  list.forEach(x => {
+    if (!x || !x.trim()) return;
     const t = document.createElement('div');
     t.className = 'tag';
     t.innerText = x.trim();
