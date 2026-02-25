@@ -57,6 +57,13 @@ function authMiddleware(req, res, next) {
   }
 }
 
+// ---------------- HELPERS ----------------
+function normalize(val) {
+  if (!val) return null;
+  if (Array.isArray(val)) return val.join(', ');
+  return val;
+}
+
 // ---------------- PUBLIC ----------------
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'))
@@ -73,25 +80,6 @@ app.get('/properties/:id', async (req, res) => {
   );
   if (!rows.length) return res.status(404).json({ message: 'Not found' });
   res.json(rows[0]);
-});
-
-// ---------------- 🔒 DUPLICATE CHECK ENDPOINT ----------------
-app.post('/admin/properties/check-duplicate', authMiddleware, async (req, res) => {
-  const { title, location, rooms_available } = req.body;
-
-  if (!title || !location || !rooms_available) {
-    return res.json({ exists: false });
-  }
-
-  const [rows] = await db.query(
-    `SELECT id FROM properties 
-     WHERE LOWER(title)=LOWER(?) 
-       AND LOWER(location)=LOWER(?) 
-       AND rooms_available=?`,
-    [title.trim(), location.trim(), rooms_available]
-  );
-
-  res.json({ exists: rows.length > 0 });
 });
 
 // ---------------- INQUIRIES ----------------
@@ -141,12 +129,11 @@ app.post('/admin/login', async (req, res) => {
   res.json({ token });
 });
 
-// ---------------- ADD PROPERTY (WITH FULL EXTENDED FIELDS) ----------------
+// ---------------- ADD PROPERTY (FIXED) ----------------
 app.post('/properties', authMiddleware, upload.array('images', 10), async (req, res) => {
 
   const { title, location, rooms_available } = req.body;
 
-  // 🔒 BACKEND DUPLICATE BLOCK
   const [dup] = await db.query(
     `SELECT id FROM properties 
      WHERE LOWER(title)=LOWER(?) 
@@ -203,10 +190,10 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
       rooms_available || null,
       distance_from_campus || null,
       walking_time || null,
-      transport_options || null,
-      security_features || null,
-      amenities || null,
-      utilities || null,
+      normalize(transport_options),
+      normalize(security_features),
+      normalize(amenities),
+      normalize(utilities),
       lease_terms || null,
       room_includes || null,
       max_lease_months || null
@@ -237,30 +224,6 @@ app.delete('/properties/:id', authMiddleware, async (req, res) => {
 
   await db.query('DELETE FROM properties WHERE id = ?', [id]);
   res.json({ message: 'Property deleted' });
-});
-
-// ---------------- ADMIN INQUIRIES ----------------
-app.get('/admin/inquiries', authMiddleware, async (req, res) => {
-  const [rows] = await db.query(
-    'SELECT * FROM inquiries ORDER BY id DESC'
-  );
-  res.json(rows);
-});
-
-app.put('/admin/inquiries/:id', authMiddleware, async (req, res) => {
-  await db.query(
-    'UPDATE inquiries SET status=? WHERE id=?',
-    [req.body.status, req.params.id]
-  );
-  res.json({ message: 'Status updated' });
-});
-
-app.delete('/admin/inquiries/:id', authMiddleware, async (req, res) => {
-  await db.query(
-    'DELETE FROM inquiries WHERE id=?',
-    [req.params.id]
-  );
-  res.json({ message: 'Inquiry deleted' });
 });
 
 app.use((req, res) => res.status(404).send('Not found'));
