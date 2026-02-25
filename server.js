@@ -129,7 +129,7 @@ app.post('/admin/login', async (req, res) => {
   res.json({ token });
 });
 
-// ---------------- ADD PROPERTY (FIXED) ----------------
+// ---------------- ADD PROPERTY ----------------
 app.post('/properties', authMiddleware, upload.array('images', 10), async (req, res) => {
 
   const { title, location, rooms_available } = req.body;
@@ -169,7 +169,7 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
     max_lease_months
   } = req.body;
 
-  const [result] = await db.query(
+  await db.query(
     `INSERT INTO properties
      (title, location, price, description, images, room_type, student_types,
       funding_options, deposit_type, deposit_amount, rooms_available,
@@ -200,7 +200,88 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
     ]
   );
 
-  res.json({ message: 'Property added', propertyId: result.insertId });
+  res.json({ message: 'Property added' });
+});
+
+// ---------------- UPDATE PROPERTY (🔥 ONLY NEW PART 🔥) ----------------
+app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
+  const id = req.params.id;
+
+  const {
+    title, location, price, description,
+    room_type, student_types, funding_options,
+    deposit_type, deposit_amount,
+    rooms_available,
+    distance_km, walking_time,
+    transport, security,
+    amenities, utilities,
+    lease_term, room_includes,
+    six_month_rooms
+  } = req.body;
+
+  let imageSql = '';
+  let imageVals = [];
+
+  if (req.files?.length) {
+    let urls = [];
+    for (const file of req.files) {
+      const result = await cloudinary.uploader.upload(file.path, { folder: 'properties' });
+      urls.push(result.secure_url);
+      if (fs.existsSync(file.path)) fs.unlinkSync(file.path);
+    }
+    imageSql = ', images=?';
+    imageVals.push(urls.join(','));
+  }
+
+  await db.query(
+    `UPDATE properties SET
+      title=?,
+      location=?,
+      price=?,
+      description=?,
+      room_type=?,
+      student_types=?,
+      funding_options=?,
+      deposit_type=?,
+      deposit_amount=?,
+      rooms_available=?,
+      distance_from_campus=?,
+      walking_time=?,
+      transport_options=?,
+      security_features=?,
+      amenities=?,
+      utilities=?,
+      lease_terms=?,
+      room_includes=?,
+      six_month_rooms=?
+      ${imageSql}
+     WHERE id=?`,
+    [
+      title || null,
+      location || null,
+      price || null,
+      description || null,
+      room_type || null,
+      student_types || null,
+      funding_options || null,
+      deposit_type || 'NO',
+      deposit_type === 'YES' ? deposit_amount : null,
+      rooms_available || null,
+      distance_km || null,
+      walking_time || null,
+      normalize(transport),
+      normalize(security),
+      normalize(amenities),
+      normalize(utilities),
+      lease_term || null,
+      room_includes || null,
+      six_month_rooms || null,
+      ...imageVals,
+      id
+    ]
+  );
+
+  res.json({ message: 'Property updated' });
 });
 
 // ---------------- DELETE PROPERTY ----------------
