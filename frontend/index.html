@@ -2,12 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Your Accommodation</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>StudentAccomo | VUT Student Accommodation Finder</title>
+
+  <meta name="description" content="StudentAccomo is a trusted student accommodation platform helping VUT students find safe, affordable, and verified housing near Vaal University of Technology. Compare rooms, view prices, and secure your accommodation easily.">
+
+  <meta name="keywords" content="VUT student accommodation, student housing near VUT, student rooms Vanderbijlpark, Vaal University accommodation, student accommodation South Africa">
+
+  <meta name="author" content="StudentAccomo">
+  <meta name="robots" content="index, follow">
+
   <link rel="stylesheet" href="/css/style.css" />
 </head>
+
 <body>
   <header class="topbar">
-    <div class="brand">Your Accommodation</div>
+    <div class="brand">StudentAccomo</div>
     <nav>
       <a href="/">Home</a>
       <a href="#about">About</a>
@@ -20,7 +31,11 @@
 
     <!-- Hero Section -->
     <section class="hero">
-      <h1>Find A Student-Friendly Accommodation Near Campus</h1>
+      <h1>Find Safe & Affordable Student Accommodation Near VUT</h1>
+      <p class="hero-sub">
+        Browse verified student housing around Vaal University of Technology.
+        Compare prices, explore room details, and secure your accommodation easily.
+      </p>
 
       <div class="search-row">
         <select id="searchMode">
@@ -28,7 +43,7 @@
           <option value="name">Search By House Name</option>
         </select>
 
-        <input id="searchInput" placeholder="Type To Search..." />
+        <input id="searchInput" placeholder="Search accommodation..." />
         <button id="searchBtn">Search</button>
         <button id="clearBtn" class="muted">Clear</button>
       </div>
@@ -40,19 +55,23 @@
     <!-- ======================
          ABOUT SECTION
     ======================= -->
-    <section id="about" style="margin-top:40px;">
-      <h2>About Us</h2>
+    <section id="about" style="margin-top:50px;">
+      <h2>About StudentAccomo</h2>
       <p>
-        We are dedicated to helping students find safe, affordable and comfortable accommodation near campuses.
-        Our platform connects students with trusted landlords, allowing you to explore, compare and inquire easily.
-        Whether you are a first-year student or returning, we aim to make your accommodation search simple and stress-free.
+        StudentAccomo is a student-focused accommodation platform built to help
+        Vaal University of Technology (VUT) students find safe, affordable, and verified housing near campus.
+      </p>
+      <p>
+        Our mission is to simplify the accommodation search process by connecting students with trusted landlords,
+        allowing them to browse, compare, and inquire effortlessly. Whether you are a first-year student or returning,
+        StudentAccomo ensures a smooth and stress-free experience.
       </p>
     </section>
 
   </main>
 
   <footer class="footer">
-    <div>© <span id="year"></span> Your Accommodation Powered By PitchCS</div>
+    <div>© <span id="year"></span> StudentAccomo | Built for VUT Students</div>
   </footer>
 
   <script src="/js/script.js"></script>
