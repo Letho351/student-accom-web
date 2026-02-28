@@ -441,35 +441,52 @@ form label{ display:block; margin-top:12px; font-weight:600; color:var(--muted) 
 }
 
 /* =========================
-   MOBILE NAVBAR FIX
+   MOBILE NAVBAR FIX (PERFECT 2-ROW ALIGNMENT)
 ========================= */
 
 @media (max-width: 480px) {
 
   .topbar{
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto;
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 2px;
     padding: 12px 14px;
   }
 
+  /* Logo */
   .topbar .brand{
+    grid-column: 1;
+    grid-row: 1 / span 2;
     font-size: 18px;
     white-space: nowrap;
   }
 
+  /* Top row links */
   .topbar nav{
+    grid-column: 2;
+    grid-row: 1;
     display: flex;
-    flex-wrap: nowrap;      /* ❌ prevent wrapping */
+    justify-content: flex-end;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    flex-wrap: nowrap;
+    white-space: nowrap;
   }
 
   .topbar nav a{
     font-size: 12px;
-    margin-left: 8px;
-    white-space: nowrap;    /* ❌ prevent text breaking */
   }
 
+  /* Admin Login under links */
   .admin-login-btn{
-    padding: 6px 10px;
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;   /* 👈 aligns under links */
+    margin-left: auto;    /* 👈 keeps nice alignment */
+    padding: 6px 12px;
     font-size: 12px;
     white-space: nowrap;
   }
