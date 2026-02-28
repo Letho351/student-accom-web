@@ -441,9 +441,49 @@ form label{ display:block; margin-top:12px; font-weight:600; color:var(--muted) 
 }
 
 /* =========================
-   MOBILE NAVBAR FIX (REAL FIX)
+   MOBILE NAVBAR FIX
 ========================= */
 
+/* Medium phones (481px - 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
+    padding: 12px 16px;
+    gap: 10px;
+  }
+
+  .topbar .brand {
+    font-size: 16px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .topbar nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  .topbar nav a {
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .admin-login-btn {
+    padding: 6px 14px;
+    font-size: 13px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+}
+
+/* Small phones (480px and below) */
 @media (max-width: 480px) {
 
   .topbar {
