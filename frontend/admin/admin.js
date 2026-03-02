@@ -247,6 +247,9 @@ window.loadAdminInquiries = async () => {
           <button class="updateStatusBtn" data-id="${inq.id}" style="padding:4px 12px;background:#1a6b3c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
             Save
           </button>
+          <button class="deleteInqBtn" data-id="${inq.id}" style="padding:4px 12px;background:#c0392b;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+            Delete
+          </button>
         </div>`;
       area.appendChild(card);
     });
@@ -271,6 +274,24 @@ window.loadAdminInquiries = async () => {
           setTimeout(() => btn.innerText = 'Save', 2000);
         } else {
           alert('Failed to update status');
+        }
+      });
+    });
+
+    document.querySelectorAll('.deleteInqBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Delete this inquiry?')) return;
+        const id = btn.dataset.id;
+
+        const r = await fetch(`/admin/inquiries/${id}`, {
+          method: 'DELETE',
+          headers: { Authorization: 'Bearer ' + token }
+        });
+
+        if (r.ok) {
+          loadAdminInquiries();
+        } else {
+          alert('Failed to delete inquiry');
         }
       });
     });

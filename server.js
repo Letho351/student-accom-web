@@ -126,6 +126,12 @@ app.put('/admin/inquiries/:id', authMiddleware, async (req, res) => {
   res.json({ message: 'Status updated' });
 });
 
+// ---------------- DELETE INQUIRY (Admin) ----------------
+app.delete('/admin/inquiries/:id', authMiddleware, async (req, res) => {
+  await db.query('DELETE FROM inquiries WHERE id=?', [req.params.id]);
+  res.json({ message: 'Inquiry deleted' });
+});
+
 // ---------------- ADMIN LOGIN ----------------
 app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
