@@ -154,7 +154,7 @@ window.loadAdminProperties = async () => {
   }
 };
 
-// ---------------- SAVE PROPERTY (FIXED KEYS ONLY) ----------------
+// ---------------- SAVE PROPERTY ----------------
 async function saveProperty() {
   const token = TOKEN();
   if (!token) return alert('You must be logged in');
@@ -170,7 +170,6 @@ async function saveProperty() {
   fd.append('student_types', collectSelect('student_types'));
   fd.append('funding_options', collectSelect('funding_options'));
 
-  // ✅ FIXED FIELD NAMES
   fd.append('transport_options', collectChecks('transport'));
   fd.append('security_features', collectChecks('security'));
 
@@ -202,6 +201,97 @@ async function saveProperty() {
   }
 }
 
+// ---------------- INQUIRIES ----------------
+window.loadAdminInquiries = async () => {
+  const token = TOKEN();
+  if (!token) return alert('Not logged in');
+
+  try {
+    const res = await fetch('/admin/inquiries', {
+      headers: { Authorization: 'Bearer ' + token }
+    });
+
+    if (!res.ok) throw new Error('Failed to fetch inquiries');
+    const list = await res.json();
+
+    const area = document.getElementById('inquiriesArea');
+    if (!area) return;
+
+    if (!list.length) {
+      area.innerHTML = '<p>No inquiries yet.</p>';
+      return;
+    }
+
+    area.innerHTML = `
+      <table class="table">
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Property</th>
+          <th>Preferred Contact</th>
+          <th>Message</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </table>`;
+
+    const table = area.querySelector('.table');
+
+    list.forEach(inq => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${inq.id}</td>
+        <td>${inq.name || ''}</td>
+        <td>${inq.email || ''}</td>
+        <td>${inq.phone || ''}</td>
+        <td>${inq.house || ''}</td>
+        <td>${inq.preferred_contact || ''}</td>
+        <td>${inq.message || ''}</td>
+        <td>
+          <select class="statusSelect" data-id="${inq.id}">
+            <option value="NEW" ${inq.status === 'NEW' ? 'selected' : ''}>NEW</option>
+            <option value="CONTACTED" ${inq.status === 'CONTACTED' ? 'selected' : ''}>CONTACTED</option>
+            <option value="RESOLVED" ${inq.status === 'RESOLVED' ? 'selected' : ''}>RESOLVED</option>
+          </select>
+        </td>
+        <td>
+          <button class="updateStatusBtn" data-id="${inq.id}">Update</button>
+        </td>`;
+      table.appendChild(tr);
+    });
+
+    // Update status buttons
+    document.querySelectorAll('.updateStatusBtn').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const id = btn.dataset.id;
+        const select = document.querySelector(`.statusSelect[data-id="${id}"]`);
+        const status = select.value;
+
+        const r = await fetch(`/admin/inquiries/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token
+          },
+          body: JSON.stringify({ status })
+        });
+
+        if (r.ok) {
+          alert('Status updated!');
+          loadAdminInquiries();
+        } else {
+          alert('Failed to update status');
+        }
+      });
+    });
+
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 // Helpers
 function collectChecks(name){
   return [...document.querySelectorAll(`input[name="${name}"]:checked`)]
@@ -223,4 +313,5 @@ function collectSelect(id){
 // ---------------- INIT ----------------
 window.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('listArea')) loadAdminProperties();
+  if (document.getElementById('inquiriesArea')) loadAdminInquiries();
 });

@@ -108,6 +108,24 @@ app.post('/inquiries', async (req, res) => {
   res.json({ message: 'Inquiry saved', inquiryId: result.insertId });
 });
 
+// ---------------- GET INQUIRIES (Admin) ----------------
+app.get('/admin/inquiries', authMiddleware, async (req, res) => {
+  const [rows] = await db.query(
+    'SELECT * FROM inquiries ORDER BY id DESC'
+  );
+  res.json(rows);
+});
+
+// ---------------- UPDATE INQUIRY STATUS (Admin) ----------------
+app.put('/admin/inquiries/:id', authMiddleware, async (req, res) => {
+  const { status } = req.body;
+  await db.query(
+    'UPDATE inquiries SET status=? WHERE id=?',
+    [status, req.params.id]
+  );
+  res.json({ message: 'Status updated' });
+});
+
 // ---------------- ADMIN LOGIN ----------------
 app.post('/admin/login', async (req, res) => {
   const { username, password } = req.body;
@@ -127,6 +145,19 @@ app.post('/admin/login', async (req, res) => {
   );
 
   res.json({ token });
+});
+
+// ---------------- DUPLICATE CHECK ----------------
+app.post('/admin/properties/check-duplicate', authMiddleware, async (req, res) => {
+  const { title, location, rooms_available } = req.body;
+  const [dup] = await db.query(
+    `SELECT id FROM properties 
+     WHERE LOWER(title)=LOWER(?) 
+       AND LOWER(location)=LOWER(?) 
+       AND rooms_available=?`,
+    [title?.trim(), location?.trim(), rooms_available]
+  );
+  res.json({ exists: dup.length > 0 });
 });
 
 // ---------------- ADD PROPERTY ----------------
@@ -203,7 +234,7 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
   res.json({ message: 'Property added' });
 });
 
-// ---------------- UPDATE PROPERTY (🔥 ONLY NEW PART 🔥) ----------------
+// ---------------- UPDATE PROPERTY ----------------
 app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
   const id = req.params.id;
 
