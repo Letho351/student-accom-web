@@ -3,8 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Admin — Inquiries</title>
-<link rel="stylesheet" href="/css/style.css" />
-
+  <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
   <script>
@@ -28,11 +27,11 @@
           <label>Filter by status</label>
           <select id="filterStatus">
             <option value="">All</option>
-            <option>New</option>
-            <option>CONTACTED</option>
-            <option>VIEWING SCHEDULED</option>
-            <option>PLACED</option>
-            <option>LOST</option>
+            <option value="NEW">New</option>
+            <option value="CONTACTED">CONTACTED</option>
+            <option value="VIEWING SCHEDULED">VIEWING SCHEDULED</option>
+            <option value="PLACED">PLACED</option>
+            <option value="LOST">LOST</option>
           </select>
         </div>
 
@@ -43,10 +42,8 @@
 
   <script src="admin.js"></script>
   <script>
-    // client-side filter that hides cards that don't match selection
     document.getElementById('filterStatus').addEventListener('change', async () => {
       const desired = document.getElementById('filterStatus').value;
-      // reload to get latest statuses, then filter view
       await window.loadAdminInquiries();
       if (!desired) return;
       const container = document.getElementById('inqList');

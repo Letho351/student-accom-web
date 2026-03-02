@@ -40,11 +40,7 @@ async function checkDuplicateProperty() {
         'Content-Type': 'application/json',
         Authorization: 'Bearer ' + token
       },
-      body: JSON.stringify({
-        title,
-        location,
-        rooms_available: rooms
-      })
+      body: JSON.stringify({ title, location, rooms_available: rooms })
     });
 
     const data = await res.json();
@@ -62,7 +58,6 @@ async function checkDuplicateProperty() {
   }
 }
 
-// listen while typing
 ['title', 'location', 'rooms_available'].forEach(id => {
   document.addEventListener('input', (e) => {
     if (e.target.id === id) checkDuplicateProperty();
@@ -111,7 +106,6 @@ window.loadAdminProperties = async () => {
         document.getElementById('deposit_type').value = p.deposit_type || 'NO';
         document.getElementById('deposit_amount').value = p.deposit_amount || '';
         document.getElementById('rooms_available').value = p.rooms_available || '';
-
         document.getElementById('distance_km').value = p.distance_km || '';
         document.getElementById('walking_time').value = p.walking_time || '';
         document.getElementById('lease_term').value = p.lease_term || '10';
@@ -169,10 +163,8 @@ async function saveProperty() {
 
   fd.append('student_types', collectSelect('student_types'));
   fd.append('funding_options', collectSelect('funding_options'));
-
   fd.append('transport_options', collectChecks('transport'));
   fd.append('security_features', collectChecks('security'));
-
   fd.append('amenities', collectChecks('amenities'));
   fd.append('utilities', collectChecks('utilities'));
   fd.append('room_includes', collectChecks('room_includes'));
@@ -206,6 +198,9 @@ window.loadAdminInquiries = async () => {
   const token = TOKEN();
   if (!token) return alert('Not logged in');
 
+  const area = document.getElementById('inqList');
+  if (!area) return;
+
   try {
     const res = await fetch('/admin/inquiries', {
       headers: { Authorization: 'Bearer ' + token }
@@ -214,59 +209,52 @@ window.loadAdminInquiries = async () => {
     if (!res.ok) throw new Error('Failed to fetch inquiries');
     const list = await res.json();
 
-    const area = document.getElementById('inquiriesArea');
-    if (!area) return;
-
     if (!list.length) {
       area.innerHTML = '<p>No inquiries yet.</p>';
       return;
     }
 
-    area.innerHTML = `
-      <table class="table">
-        <tr>
-          <th>#</th>
-          <th>Name</th>
-          <th>Email</th>
-          <th>Phone</th>
-          <th>Property</th>
-          <th>Preferred Contact</th>
-          <th>Message</th>
-          <th>Status</th>
-          <th>Action</th>
-        </tr>
-      </table>`;
-
-    const table = area.querySelector('.table');
+    area.innerHTML = '';
 
     list.forEach(inq => {
-      const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td>${inq.id}</td>
-        <td>${inq.name || ''}</td>
-        <td>${inq.email || ''}</td>
-        <td>${inq.phone || ''}</td>
-        <td>${inq.house || ''}</td>
-        <td>${inq.preferred_contact || ''}</td>
-        <td>${inq.message || ''}</td>
-        <td>
-          <select class="statusSelect" data-id="${inq.id}">
+      const card = document.createElement('div');
+      card.className = 'inq-card';
+      card.style.cssText = 'background:#fff;border:1px solid #ddd;border-radius:8px;padding:16px;margin-bottom:12px;';
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+          <div>
+            <strong>${inq.name || ''}</strong>
+            <span style="margin-left:12px;color:#666;font-size:13px;">${inq.email || ''} | ${inq.phone || ''}</span>
+          </div>
+          <div style="font-size:13px;color:#888;">#${inq.id}</div>
+        </div>
+        <div style="margin-top:8px;font-size:14px;">
+          <strong>Property:</strong> ${inq.house || 'N/A'} &nbsp;|&nbsp;
+          <strong>Preferred Contact:</strong> ${inq.preferred_contact || 'N/A'}
+        </div>
+        <div style="margin-top:6px;font-size:14px;color:#333;">
+          <strong>Message:</strong> ${inq.message || ''}
+        </div>
+        <div style="margin-top:10px;display:flex;align-items:center;gap:8px;">
+          <label style="font-size:13px;font-weight:600;">Status:</label>
+          <select class="statusSel" data-id="${inq.id}" style="padding:4px 8px;border-radius:4px;border:1px solid #ccc;">
             <option value="NEW" ${inq.status === 'NEW' ? 'selected' : ''}>NEW</option>
             <option value="CONTACTED" ${inq.status === 'CONTACTED' ? 'selected' : ''}>CONTACTED</option>
-            <option value="RESOLVED" ${inq.status === 'RESOLVED' ? 'selected' : ''}>RESOLVED</option>
+            <option value="VIEWING SCHEDULED" ${inq.status === 'VIEWING SCHEDULED' ? 'selected' : ''}>VIEWING SCHEDULED</option>
+            <option value="PLACED" ${inq.status === 'PLACED' ? 'selected' : ''}>PLACED</option>
+            <option value="LOST" ${inq.status === 'LOST' ? 'selected' : ''}>LOST</option>
           </select>
-        </td>
-        <td>
-          <button class="updateStatusBtn" data-id="${inq.id}">Update</button>
-        </td>`;
-      table.appendChild(tr);
+          <button class="updateStatusBtn" data-id="${inq.id}" style="padding:4px 12px;background:#1a6b3c;color:#fff;border:none;border-radius:4px;cursor:pointer;">
+            Save
+          </button>
+        </div>`;
+      area.appendChild(card);
     });
 
-    // Update status buttons
     document.querySelectorAll('.updateStatusBtn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const id = btn.dataset.id;
-        const select = document.querySelector(`.statusSelect[data-id="${id}"]`);
+        const select = document.querySelector(`.statusSel[data-id="${id}"]`);
         const status = select.value;
 
         const r = await fetch(`/admin/inquiries/${id}`, {
@@ -279,8 +267,8 @@ window.loadAdminInquiries = async () => {
         });
 
         if (r.ok) {
-          alert('Status updated!');
-          loadAdminInquiries();
+          btn.innerText = '✓ Saved';
+          setTimeout(() => btn.innerText = 'Save', 2000);
         } else {
           alert('Failed to update status');
         }
@@ -289,29 +277,30 @@ window.loadAdminInquiries = async () => {
 
   } catch (err) {
     console.error(err);
+    area.innerHTML = '<p style="color:red">Failed to load inquiries.</p>';
   }
 };
 
-// Helpers
-function collectChecks(name){
+// ---------------- HELPERS ----------------
+function collectChecks(name) {
   return [...document.querySelectorAll(`input[name="${name}"]:checked`)]
-          .map(x=>x.value).join(',');
+    .map(x => x.value).join(',');
 }
 
-function restoreCheckbox(name, val){
-  if(!val) return;
-  const arr = val.split(',').map(x=>x.trim());
-  document.querySelectorAll(`input[name="${name}"]`).forEach(cb=>{
+function restoreCheckbox(name, val) {
+  if (!val) return;
+  const arr = val.split(',').map(x => x.trim());
+  document.querySelectorAll(`input[name="${name}"]`).forEach(cb => {
     cb.checked = arr.includes(cb.value);
   });
 }
 
-function collectSelect(id){
-  return [...document.getElementById(id).selectedOptions].map(o=>o.text).join(',');
+function collectSelect(id) {
+  return [...document.getElementById(id).selectedOptions].map(o => o.text).join(',');
 }
 
 // ---------------- INIT ----------------
 window.addEventListener('DOMContentLoaded', () => {
   if (document.getElementById('listArea')) loadAdminProperties();
-  if (document.getElementById('inquiriesArea')) loadAdminInquiries();
+  if (document.getElementById('inqList')) loadAdminInquiries();
 });
