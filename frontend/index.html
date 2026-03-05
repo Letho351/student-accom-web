@@ -2,81 +2,630 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <title>StudentAccomo | VUT Student Accommodation Finder</title>
 
-  <meta name="description" content="StudentAccomo is a trusted student accommodation platform helping VUT students find safe, affordable, and verified housing near Vaal University of Technology. Compare rooms, view prices, and secure your accommodation easily.">
+  <meta name="description" content="StudentAccomo is a trusted student accommodation platform helping VUT students find safe, affordable, and verified housing near Vaal University of Technology. Compare rooms, view prices, and secure your accommodation easily." />
+  <meta name="keywords" content="VUT student accommodation, student housing near VUT, student rooms Vanderbijlpark, Vaal University accommodation, student accommodation South Africa" />
+  <meta name="author" content="StudentAccomo" />
+  <meta name="robots" content="index, follow" />
 
-  <meta name="keywords" content="VUT student accommodation, student housing near VUT, student rooms Vanderbijlpark, Vaal University accommodation, student accommodation South Africa">
+  <!-- Open Graph -->
+  <meta property="og:title" content="StudentAccomo | VUT Student Accommodation" />
+  <meta property="og:description" content="Find safe, affordable, verified student housing near VUT." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.studentaccomo.co.za" />
 
-  <meta name="author" content="StudentAccomo">
-  <meta name="robots" content="index, follow">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="/css/style.css" />
+
+  <style>
+    /* Filter toggle button — mobile only */
+    .filter-toggle-btn {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: var(--card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      margin-bottom: 14px;
+      font-family: inherit;
+      transition: all var(--duration-fast);
+    }
+    .filter-toggle-btn:hover { border-color: var(--coral); color: var(--coral); }
+    @media (max-width: 900px) { .filter-toggle-btn { display: flex; } }
+
+    /* Results header */
+    .results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .results-count {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+    .results-count span { color: var(--coral); font-weight: 700; }
+
+    /* Sort */
+    .sort-select {
+      padding: 8px 14px;
+      font-size: 13px;
+      width: auto;
+      border-radius: var(--radius-sm);
+    }
+
+    /* No results */
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .no-results-icon { font-size: 48px; margin-bottom: 14px; }
+    .no-results h3   { color: var(--text-secondary); margin-bottom: 8px; }
+
+    /* About section */
+    .about-section {
+      margin-top: 72px;
+      padding: 56px 0;
+      border-top: 1px solid var(--border);
+    }
+
+    .about-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 56px;
+      align-items: center;
+    }
+
+    .about-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 12px;
+      background: var(--coral-glow);
+      border: 1px solid rgba(232,79,63,0.2);
+      border-radius: var(--radius-pill);
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--coral);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 16px;
+    }
+
+    .about-grid h2 { margin-bottom: 16px; }
+    .about-grid p  { margin-bottom: 14px; font-size: 15px; }
+
+    .about-features {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .about-feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      padding: 16px;
+      background: var(--card);
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border);
+      transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+    }
+
+    .about-feature:hover {
+      border-color: rgba(232,79,63,0.25);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .about-feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .about-feature-text h4 { font-size: 14px; font-weight: 700; margin-bottom: 3px; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .about-feature-text p  { font-size: 13px; color: var(--text-muted); margin: 0; }
+
+    .about-stats-card {
+      background: var(--navy);
+      border-radius: var(--radius-xl);
+      padding: 40px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .about-stats-card::before {
+      content: '';
+      position: absolute;
+      top: -60px;
+      right: -60px;
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, rgba(232,79,63,0.25), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .about-stats-card::after {
+      content: '';
+      position: absolute;
+      bottom: -40px;
+      left: -40px;
+      width: 160px;
+      height: 160px;
+      background: radial-gradient(circle, rgba(245,166,35,0.15), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .about-stats-inner { position: relative; z-index: 1; }
+
+    .about-stats-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #fff;
+    }
+
+    .about-stats-title span { color: var(--coral); }
+
+    .about-stats-sub {
+      color: rgba(255,255,255,0.5);
+      font-size: 14px;
+      margin-bottom: 32px;
+    }
+
+    .about-stats-numbers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .about-stat-item {
+      background: rgba(255,255,255,0.06);
+      border-radius: var(--radius-md);
+      padding: 18px;
+      border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .about-stat-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .about-stat-num.coral { color: var(--coral); }
+    .about-stat-num.gold  { color: var(--gold); }
+
+    .about-stat-label {
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      font-weight: 500;
+    }
+
+    @media (max-width: 900px) {
+      .about-grid { grid-template-columns: 1fr; gap: 32px; }
+    }
+  </style>
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="brand">StudentAccomo</div>
+
+  <!-- ============================================================
+       TOPBAR
+  ============================================================ -->
+  <header class="topbar" id="topbar">
+    <a href="/" class="brand">
+      StudentAccomo<span class="brand-dot"></span>
+    </a>
+
     <nav>
-      <a href="/">Home</a>
+      <a href="/" class="active">Home</a>
       <a href="#about">About</a>
       <a href="/inquiry.html">Contact</a>
     </nav>
-    <button class="admin-login-btn" onclick="window.location.href='/admin-login.html'">Admin Login</button>
+
+    <div class="topbar-right">
+      <button class="admin-login-btn" onclick="window.location.href='/admin-login.html'">
+        Admin Login
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </header>
 
-  <main class="container">
+  <!-- Mobile Nav -->
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/">🏠 Home</a>
+    <a href="#about">ℹ️ About</a>
+    <a href="/inquiry.html">✉️ Contact</a>
+    <a href="/admin-login.html" style="color:var(--coral);font-weight:700;">🔐 Admin Login</a>
+  </nav>
 
-    <!-- Hero Section -->
+  <main>
+
+    <!-- ============================================================
+         HERO
+    ============================================================ -->
     <section class="hero">
-      <h1>Find Safe & Affordable Student Accommodation Near VUT</h1>
-      <p class="hero-sub">
-        Browse verified student housing around Vaal University of Technology.
-        Compare prices, explore room details, and secure your accommodation easily.
-      </p>
+      <div class="container hero-inner">
 
-      <div class="search-row">
-        <select id="searchMode">
-          <option value="location">Search By Location</option>
-          <option value="name">Search By House Name</option>
-        </select>
+        <div class="hero-eyebrow">
+          <span>🎓</span> VUT's #1 Accommodation Platform
+        </div>
 
-        <input id="searchInput" placeholder="Search accommodation..." />
-        <button id="searchBtn">Search</button>
-        <button id="clearBtn" class="muted">Clear</button>
+        <h1>Find Your Perfect<br /><span>Student Home</span> Near VUT</h1>
+
+        <p class="hero-sub">
+          Browse verified, safe, and affordable student accommodation around
+          Vaal University of Technology. Real listings. Real prices. No stress.
+        </p>
+
+        <!-- Hero Stats -->
+        <div class="hero-stats" id="heroStats">
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="statTotal">—</div>
+            <div class="hero-stat-label">Total Listings</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="statAvail">—</div>
+            <div class="hero-stat-label">Available Now</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="statRooms">—</div>
+            <div class="hero-stat-label">Rooms Available</div>
+          </div>
+          <div class="hero-stat-divider"></div>
+          <div class="hero-stat">
+            <div class="hero-stat-num" id="statFrom">—</div>
+            <div class="hero-stat-label">Starting From</div>
+          </div>
+        </div>
+
+        <!-- Search -->
+        <div class="search-bar">
+          <div class="search-wrap">
+            <select id="searchMode">
+              <option value="location">📍 Location</option>
+              <option value="name">🏠 House Name</option>
+            </select>
+            <input
+              id="searchInput"
+              placeholder="Search accommodation..."
+              autocomplete="off"
+              spellcheck="false"
+            />
+            <button class="btn btn--primary" id="searchBtn">Search</button>
+          </div>
+        </div>
+
       </div>
     </section>
 
-    <!-- Property Display -->
-    <section id="property-list" class="cards-grid"></section>
+    <!-- ============================================================
+         LISTINGS
+    ============================================================ -->
+    <section class="section--sm">
+      <div class="container">
 
-    <!-- ======================
-         ABOUT SECTION
-    ======================= -->
-    <section id="about" style="margin-top:50px;">
-      <h2>About StudentAccomo</h2>
-      <p>
-        StudentAccomo is a student-focused accommodation platform built to help
-        Vaal University of Technology (VUT) students find safe, affordable, and verified housing near campus.
-      </p>
-      <p>
-        Our mission is to simplify the accommodation search process by connecting students with trusted landlords,
-        allowing them to browse, compare, and inquire effortlessly. Whether you are a first-year student or returning,
-        StudentAccomo ensures a smooth and stress-free experience.
-      </p>
+        <button class="filter-toggle-btn" id="filterToggle">
+          ⚙️ Filters <span id="activeFilterCount"></span>
+        </button>
+
+        <div class="content-layout">
+
+          <!-- ---- FILTER SIDEBAR ---- -->
+          <aside class="filter-sidebar" id="filterSidebar">
+            <h4>
+              Filters
+              <button class="filter-clear" id="clearFilters">Clear all</button>
+            </h4>
+
+            <!-- Price Range -->
+            <div class="filter-section">
+              <div class="filter-section-title">Monthly Price (R)</div>
+              <div class="price-range-wrap">
+                <div class="price-values">
+                  <span>R<span id="priceMin">0</span></span>
+                  <span>R<span id="priceMax">10000</span>+</span>
+                </div>
+                <input
+                  type="range"
+                  id="priceRange"
+                  min="0" max="10000" value="10000" step="100"
+                  style="--val: 100%"
+                />
+              </div>
+            </div>
+
+            <!-- Room Type -->
+            <div class="filter-section">
+              <div class="filter-section-title">Room Type</div>
+              <div class="filter-check-list">
+                <label class="filter-check">
+                  <input type="checkbox" name="roomType" value="Single" /> Single Room
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="roomType" value="Sharing" /> Sharing Room
+                </label>
+              </div>
+            </div>
+
+            <!-- Student Type -->
+            <div class="filter-section">
+              <div class="filter-section-title">Student Type</div>
+              <div class="filter-check-list">
+                <label class="filter-check">
+                  <input type="checkbox" name="studentType" value="VUT" /> VUT Students
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="studentType" value="NWU" /> NWU Students
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="studentType" value="Sedibeng" /> Sedibeng
+                </label>
+              </div>
+            </div>
+
+            <!-- Funding -->
+            <div class="filter-section">
+              <div class="filter-section-title">Funding</div>
+              <div class="filter-check-list">
+                <label class="filter-check">
+                  <input type="checkbox" name="funding" value="Bursary" /> Bursary Accepted
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="funding" value="Self-funded" /> Self-funded
+                </label>
+              </div>
+            </div>
+
+            <!-- Amenities -->
+            <div class="filter-section">
+              <div class="filter-section-title">Must Have</div>
+              <div class="filter-check-list">
+                <label class="filter-check">
+                  <input type="checkbox" name="amenity" value="WiFi" /> WiFi
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="amenity" value="Laundry" /> Laundry
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="amenity" value="Parking" /> Parking
+                </label>
+                <label class="filter-check">
+                  <input type="checkbox" name="amenity" value="Study Area" /> Study Area
+                </label>
+              </div>
+            </div>
+
+            <!-- Deposit -->
+            <div class="filter-section">
+              <div class="filter-section-title">Deposit</div>
+              <div class="filter-check-list">
+                <label class="filter-check">
+                  <input type="checkbox" name="deposit" value="NO" /> No Deposit
+                </label>
+              </div>
+            </div>
+
+            <!-- Availability -->
+            <div class="filter-section">
+              <div class="filter-section-title">Availability</div>
+              <div class="filter-check-list">
+                <label class="filter-check">
+                  <input type="checkbox" name="availability" value="available" /> Available Only
+                </label>
+              </div>
+            </div>
+
+          </aside>
+
+          <!-- ---- RESULTS ---- -->
+          <div>
+            <div class="results-header">
+              <div class="results-count">
+                Showing <span id="resultCount">0</span> properties
+              </div>
+              <select class="sort-select" id="sortSelect">
+                <option value="newest">Newest First</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="rooms">Most Rooms</option>
+              </select>
+            </div>
+
+            <div id="property-list" class="cards-grid stagger"></div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         ABOUT
+    ============================================================ -->
+    <section id="about" class="about-section">
+      <div class="container">
+        <div class="about-grid">
+
+          <div>
+            <div class="about-eyebrow">🏢 About Us</div>
+            <h2>Built for VUT Students, By People Who Care</h2>
+            <p>
+              StudentAccomo is a dedicated accommodation platform built to take the stress
+              out of finding student housing near Vaal University of Technology.
+            </p>
+            <p>
+              Every listing is personally verified by our admin team in partnership with trusted
+              local landlords — so what you see is what you get. No scams, no surprises.
+            </p>
+
+            <div class="about-features">
+              <div class="about-feature">
+                <div class="about-feature-icon" style="background:var(--coral-glow)">✅</div>
+                <div class="about-feature-text">
+                  <h4>Verified Listings Only</h4>
+                  <p>Every property is checked before it goes live on the platform.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon" style="background:var(--gold-glow)">⚡</div>
+                <div class="about-feature-text">
+                  <h4>Fast Inquiry Response</h4>
+                  <p>Our team connects you with landlords quickly — no waiting around.</p>
+                </div>
+              </div>
+              <div class="about-feature">
+                <div class="about-feature-icon" style="background:var(--available-bg)">🔒</div>
+                <div class="about-feature-text">
+                  <h4>Safe & Trusted</h4>
+                  <p>All accommodations are assessed for safety before listing.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-stats-card">
+            <div class="about-stats-inner">
+              <div class="about-stats-title">
+                Your home away <span>from home.</span>
+              </div>
+              <div class="about-stats-sub">
+                Helping VUT students since day one.
+              </div>
+              <div class="about-stats-numbers" id="aboutStats">
+                <div class="about-stat-item">
+                  <div class="about-stat-num coral" id="aboutTotal">—</div>
+                  <div class="about-stat-label">Active Listings</div>
+                </div>
+                <div class="about-stat-item">
+                  <div class="about-stat-num gold" id="aboutRooms">—</div>
+                  <div class="about-stat-label">Rooms Available</div>
+                </div>
+                <div class="about-stat-item">
+                  <div class="about-stat-num" style="color:#fff" id="aboutInquiries">—</div>
+                  <div class="about-stat-label">Student Inquiries</div>
+                </div>
+                <div class="about-stat-item">
+                  <div class="about-stat-num" style="color:#fff">100%</div>
+                  <div class="about-stat-label">Verified Properties</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </section>
 
   </main>
 
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
   <footer class="footer">
-    <div>© <span id="year"></span> StudentAccomo | Built for VUT Students</div>
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">StudentAccomo<span>.</span></div>
+        <p>The trusted student accommodation platform for VUT students.</p>
+      </div>
+      <div class="footer-links">
+        <a href="/">Home</a>
+        <a href="#about">About</a>
+        <a href="/inquiry.html">Contact</a>
+        <a href="/admin-login.html">Admin</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> StudentAccomo | Built for VUT Students 🎓</span>
+      <span>Vanderbijlpark, Gauteng, South Africa</span>
+    </div>
   </footer>
+
+  <!-- Floating WhatsApp Button -->
+  <a
+    class="fab-whatsapp"
+    href="https://wa.me/27000000000?text=Hi%2C%20I%20found%20StudentAccomo%20and%20I'm%20looking%20for%20accommodation%20near%20VUT."
+    target="_blank"
+    rel="noopener"
+    aria-label="Chat on WhatsApp"
+  >
+    <div class="fab-tooltip">Chat with us</div>
+    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+    </svg>
+  </a>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
 
   <script src="/js/script.js"></script>
   <script>
+    // Year
     document.getElementById('year').innerText = new Date().getFullYear();
+
+    // Topbar scroll effect
+    const topbar = document.getElementById('topbar');
+    window.addEventListener('scroll', () => {
+      topbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // Hamburger menu
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+    });
+
+    // Close mobile nav on link click
+    mobileNav.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        hamburger.classList.remove('open');
+        mobileNav.classList.remove('open');
+      });
+    });
+
+    // Filter sidebar toggle (mobile)
+    const filterToggle = document.getElementById('filterToggle');
+    const filterSidebar = document.getElementById('filterSidebar');
+    filterToggle.addEventListener('click', () => {
+      filterSidebar.classList.toggle('open');
+      filterToggle.textContent = filterSidebar.classList.contains('open')
+        ? '✕ Hide Filters'
+        : '⚙️ Filters';
+    });
   </script>
+
 </body>
 </html>
