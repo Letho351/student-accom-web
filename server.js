@@ -48,7 +48,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change_this_secret';
 function authMiddleware(req, res, next) {
   const hdr = req.headers.authorization;
   if (!hdr) return res.status(401).json({ error: 'Missing token' });
-
   try {
     req.admin = jwt.verify(hdr.split(' ')[1], JWT_SECRET);
     next();
@@ -64,7 +63,7 @@ function normalize(val) {
   return val;
 }
 
-// ---------------- PUBLIC ----------------
+// ---------------- PUBLIC ROUTES ----------------
 app.get('/', (req, res) =>
   res.sendFile(path.join(__dirname, 'frontend', 'index.html'))
 );
@@ -110,9 +109,7 @@ app.post('/inquiries', async (req, res) => {
 
 // ---------------- GET INQUIRIES (Admin) ----------------
 app.get('/admin/inquiries', authMiddleware, async (req, res) => {
-  const [rows] = await db.query(
-    'SELECT * FROM inquiries ORDER BY id DESC'
-  );
+  const [rows] = await db.query('SELECT * FROM inquiries ORDER BY id DESC');
   res.json(rows);
 });
 
@@ -153,6 +150,37 @@ app.post('/admin/login', async (req, res) => {
   res.json({ token });
 });
 
+// ---------------- CHANGE PASSWORD (Admin) ----------------
+// NEW: Added for Settings page password change functionality
+app.post('/admin/change-password', authMiddleware, async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword)
+    return res.status(400).json({ error: 'Both fields are required' });
+
+  if (newPassword.length < 8)
+    return res.status(400).json({ error: 'New password must be at least 8 characters' });
+
+  const [rows] = await db.query(
+    'SELECT * FROM admin_users WHERE id = ?', [req.admin.id]
+  );
+
+  if (!rows.length)
+    return res.status(404).json({ error: 'Admin user not found' });
+
+  const valid = await bcrypt.compare(currentPassword, rows[0].password);
+  if (!valid)
+    return res.status(401).json({ error: 'Current password is incorrect' });
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  await db.query(
+    'UPDATE admin_users SET password=? WHERE id=?',
+    [hashed, req.admin.id]
+  );
+
+  res.json({ message: 'Password updated successfully' });
+});
+
 // ---------------- DUPLICATE CHECK ----------------
 app.post('/admin/properties/check-duplicate', authMiddleware, async (req, res) => {
   const { title, location, rooms_available } = req.body;
@@ -168,7 +196,6 @@ app.post('/admin/properties/check-duplicate', authMiddleware, async (req, res) =
 
 // ---------------- ADD PROPERTY ----------------
 app.post('/properties', authMiddleware, upload.array('images', 10), async (req, res) => {
-
   const { title, location, rooms_available } = req.body;
 
   const [dup] = await db.query(
@@ -184,7 +211,6 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
   }
 
   let imageUrls = [];
-
   if (req.files?.length) {
     for (const file of req.files) {
       const result = await cloudinary.uploader.upload(file.path, {
@@ -272,47 +298,24 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
 
   await db.query(
     `UPDATE properties SET
-      title=?,
-      location=?,
-      price=?,
-      description=?,
-      room_type=?,
-      student_types=?,
-      funding_options=?,
-      deposit_type=?,
-      deposit_amount=?,
-      rooms_available=?,
-      distance_from_campus=?,
-      walking_time=?,
-      transport_options=?,
-      security_features=?,
-      amenities=?,
-      utilities=?,
-      lease_terms=?,
-      room_includes=?,
-      six_month_rooms=?
+      title=?, location=?, price=?, description=?,
+      room_type=?, student_types=?, funding_options=?,
+      deposit_type=?, deposit_amount=?,
+      rooms_available=?, distance_from_campus=?, walking_time=?,
+      transport_options=?, security_features=?,
+      amenities=?, utilities=?,
+      lease_terms=?, room_includes=?, six_month_rooms=?
       ${imageSql}
      WHERE id=?`,
     [
-      title || null,
-      location || null,
-      price || null,
-      description || null,
-      room_type || null,
-      student_types || null,
-      funding_options || null,
+      title || null, location || null, price || null, description || null,
+      room_type || null, student_types || null, funding_options || null,
       deposit_type || 'NO',
       deposit_type === 'YES' ? deposit_amount : null,
-      rooms_available || null,
-      distance_km || null,
-      walking_time || null,
-      normalize(transport),
-      normalize(security),
-      normalize(amenities),
-      normalize(utilities),
-      lease_term || null,
-      room_includes || null,
-      six_month_rooms || null,
+      rooms_available || null, distance_km || null, walking_time || null,
+      normalize(transport), normalize(security),
+      normalize(amenities), normalize(utilities),
+      lease_term || null, room_includes || null, six_month_rooms || null,
       ...imageVals,
       id
     ]
@@ -328,9 +331,7 @@ app.delete('/properties/:id', authMiddleware, async (req, res) => {
   const [rows] = await db.query(
     'SELECT images FROM properties WHERE id = ?', [id]
   );
-  if (!rows.length) {
-    return res.status(404).json({ message: 'Property not found' });
-  }
+  if (!rows.length) return res.status(404).json({ message: 'Property not found' });
 
   if (rows[0].images) {
     const images = rows[0].images.split(',');
@@ -344,9 +345,8 @@ app.delete('/properties/:id', authMiddleware, async (req, res) => {
   res.json({ message: 'Property deleted' });
 });
 
+// ---------------- 404 ----------------
 app.use((req, res) => res.status(404).send('Not found'));
 
 const PORT = Number(process.env.PORT || 4000);
-app.listen(PORT, () =>
-  console.log(`🚀 Server listening on ${PORT}`)
-);
+app.listen(PORT, () => console.log(`🚀 Server listening on ${PORT}`));
