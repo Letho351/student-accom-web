@@ -1,180 +1,225 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Admin — Properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Properties — StudentAccomo Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
-<body>
+<body style="margin:0;background:var(--bg)">
 
-  <script>
-    if (!localStorage.getItem("admin_token")) location.href = '/admin-login.html';
-  </script>
+  <script>if (!localStorage.getItem('admin_token')) location.href = '/admin-login.html';</script>
 
-  <div class="container">
-    <h1>Properties</h1>
+  <!-- TOP BAR -->
+  <div class="admin-topbar">
+    <div class="brand">Student<span>Accomo</span> <span style="font-size:12px;color:rgba(255,255,255,0.35);font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;">Admin</span></div>
+    <div class="admin-topbar-right">
+      <div class="admin-user-badge">
+        <div class="avatar" id="avatarInitial">A</div>
+        <span id="adminUsername">Admin</span>
+      </div>
+    </div>
+  </div>
 
-    <div class="admin-wrap">
-      <aside class="admin-sidebar">
-        <strong>Menu</strong>
-        <div class="menu-item" data-href="dashboard.html">Dashboard</div>
-        <div class="menu-item active" data-href="properties.html">Properties</div>
-        <div class="menu-item" data-href="inquiries.html">Student Inquiries</div>
-        <div class="menu-item" data-href="settings.html">Settings</div>
-        <div style="margin-top:12px">
-          <button onclick="logout()">Logout</button>
-        </div>
-      </aside>
+  <!-- PAGE BODY -->
+  <div style="display:flex;min-height:calc(100vh - 60px)">
 
-      <main class="admin-main">
+    <!-- SIDEBAR -->
+    <aside style="width:220px;min-width:220px;flex-shrink:0;background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;box-sizing:border-box;display:flex;flex-direction:column;">
+      <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;padding:0 10px;margin-bottom:8px;">Navigation</div>
+      <div class="menu-item" onclick="location.href='dashboard.html'"><span class="menu-icon">📊</span> Dashboard</div>
+      <div class="menu-item active" onclick="location.href='properties.html'"><span class="menu-icon">🏠</span> Properties</div>
+      <div class="menu-item" onclick="location.href='inquiries.html'"><span class="menu-icon">💬</span> Student Inquiries</div>
+      <div class="menu-item" onclick="location.href='settings.html'"><span class="menu-icon">⚙️</span> Settings</div>
+      <div style="margin-top:auto;padding-top:16px;border-top:1px solid #e5e7eb;">
+        <div class="menu-item" onclick="logout()" style="color:#e84f3f;"><span class="menu-icon">🚪</span> Logout</div>
+      </div>
+    </aside>
 
-        <div id="formArea" style="margin-bottom:18px;">
-          <h3 id="formTitle">Add Property</h3>
+    <!-- MAIN -->
+    <main style="flex:1;min-width:0;padding:28px 24px;box-sizing:border-box;overflow-x:hidden;">
 
-          <form id="propertyForm" style="max-width:900px;" enctype="multipart/form-data">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+        <h1 style="font-size:24px;font-weight:800;margin:0;">Properties</h1>
+        <p id="propMsg" style="font-size:13px;color:var(--available);font-weight:600;margin:0;"></p>
+      </div>
 
-            <label for="title">Title</label>
-            <input id="title" name="title" placeholder="Title" required />
+      <!-- ADD/EDIT FORM -->
+      <div id="formArea" style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:24px;margin-bottom:24px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
+        <h3 id="formTitle" style="margin:0 0 20px 0;font-size:18px;font-weight:800;">Add Property</h3>
 
-            <label for="location">Location</label>
-            <input id="location" name="location" placeholder="Location" required />
+        <form id="propertyForm" enctype="multipart/form-data">
 
-            <div class="form-row">
-              <input id="price" name="price" type="number" min="0" placeholder="Price (R)" required />
+          <label for="title">Title</label>
+          <input id="title" name="title" placeholder="Property title" required />
+
+          <label for="location">Location</label>
+          <input id="location" name="location" placeholder="Full address / area" required />
+
+          <div class="form-row">
+            <div>
+              <label for="price">Price (R/month)</label>
+              <input id="price" name="price" type="number" min="0" placeholder="e.g. 3500" required />
+            </div>
+            <div>
+              <label for="room_type">Room Type</label>
               <select id="room_type" name="room_type" required>
-                <option value="">Room type</option>
+                <option value="">Select room type</option>
                 <option value="Single">Single</option>
                 <option value="Sharing">Sharing</option>
               </select>
             </div>
+          </div>
 
-            <label>Distance to VUT</label>
-            <div class="form-row">
-              <input id="distance_km" name="distance_km" type="number" step="0.1" placeholder="Distance (km)" />
-              <input id="walking_time" name="walking_time" type="number" placeholder="Walking time (minutes)" />
-            </div>
+          <label>Distance to VUT</label>
+          <div class="form-row">
+            <input id="distance_km" name="distance_km" type="number" step="0.1" placeholder="Distance (km)" />
+            <input id="walking_time" name="walking_time" type="number" placeholder="Walking time (minutes)" />
+          </div>
 
-            <label>Transport Options</label>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="transport" value="Taxi"> Taxi</label>
-              <label><input type="checkbox" name="transport" value="Bus"> Bus</label>
-              <label><input type="checkbox" name="transport" value="Campus Shuttle"> Campus Shuttle</label>
-              <label><input type="checkbox" name="transport" value="Train"> Train</label>
-              <label><input type="checkbox" name="transport" value="Walking Distance"> Walking Distance</label>
-            </div>
+          <label>Transport Options</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" name="transport" value="Taxi"> Taxi</label>
+            <label><input type="checkbox" name="transport" value="Bus"> Bus</label>
+            <label><input type="checkbox" name="transport" value="Campus Shuttle"> Campus Shuttle</label>
+            <label><input type="checkbox" name="transport" value="Train"> Train</label>
+            <label><input type="checkbox" name="transport" value="Walking Distance"> Walking Distance</label>
+          </div>
 
-            <label>Security Features</label>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="security" value="24/7 Security"> 24/7 Security</label>
-              <label><input type="checkbox" name="security" value="CCTV"> CCTV</label>
-              <label><input type="checkbox" name="security" value="Biometric Access"> Biometric Access</label>
-              <label><input type="checkbox" name="security" value="Controlled Gate"> Controlled Gate</label>
-              <label><input type="checkbox" name="security" value="Electric Fence"> Electric Fence</label>
-            </div>
+          <label>Security Features</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" name="security" value="24/7 Security"> 24/7 Security</label>
+            <label><input type="checkbox" name="security" value="CCTV"> CCTV</label>
+            <label><input type="checkbox" name="security" value="Biometric Access"> Biometric Access</label>
+            <label><input type="checkbox" name="security" value="Controlled Gate"> Controlled Gate</label>
+            <label><input type="checkbox" name="security" value="Electric Fence"> Electric Fence</label>
+          </div>
 
-            <label>Amenities</label>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="amenities" value="WiFi"> WiFi</label>
-              <label><input type="checkbox" name="amenities" value="Laundry"> Laundry</label>
-              <label><input type="checkbox" name="amenities" value="Study Area"> Study Area</label>
-              <label><input type="checkbox" name="amenities" value="Cleaning"> Cleaning</label>
-              <label><input type="checkbox" name="amenities" value="Parking"> Parking</label>
-              <label><input type="checkbox" name="amenities" value="TV Lounge"> TV Lounge</label>
-            </div>
+          <label>Amenities</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" name="amenities" value="WiFi"> WiFi</label>
+            <label><input type="checkbox" name="amenities" value="Laundry"> Laundry</label>
+            <label><input type="checkbox" name="amenities" value="Study Area"> Study Area</label>
+            <label><input type="checkbox" name="amenities" value="Cleaning"> Cleaning</label>
+            <label><input type="checkbox" name="amenities" value="Parking"> Parking</label>
+            <label><input type="checkbox" name="amenities" value="TV Lounge"> TV Lounge</label>
+          </div>
 
-            <label>Room Includes</label>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="room_includes" value="Bed"> Bed</label>
-              <label><input type="checkbox" name="room_includes" value="Desk"> Desk</label>
-              <label><input type="checkbox" name="room_includes" value="Chair"> Chair</label>
-              <label><input type="checkbox" name="room_includes" value="Wardrobe"> Wardrobe</label>
-              <label><input type="checkbox" name="room_includes" value="Curtains"> Curtains</label>
-              <label><input type="checkbox" name="room_includes" value="Heater"> Heater</label>
-            </div>
+          <label>Room Includes</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" name="room_includes" value="Bed"> Bed</label>
+            <label><input type="checkbox" name="room_includes" value="Desk"> Desk</label>
+            <label><input type="checkbox" name="room_includes" value="Chair"> Chair</label>
+            <label><input type="checkbox" name="room_includes" value="Wardrobe"> Wardrobe</label>
+            <label><input type="checkbox" name="room_includes" value="Curtains"> Curtains</label>
+            <label><input type="checkbox" name="room_includes" value="Heater"> Heater</label>
+          </div>
 
-            <label>Utilities</label>
-            <div class="checkbox-grid">
-              <label><input type="checkbox" name="utilities" value="Water Included"> Water Included</label>
-              <label><input type="checkbox" name="utilities" value="Electricity Included"> Electricity Included</label>
-              <label><input type="checkbox" name="utilities" value="Backup Water"> Backup Water</label>
-              <label><input type="checkbox" name="utilities" value="Backup Solar"> Backup Solar</label>
-            </div>
+          <label>Utilities</label>
+          <div class="checkbox-grid">
+            <label><input type="checkbox" name="utilities" value="Water Included"> Water Included</label>
+            <label><input type="checkbox" name="utilities" value="Electricity Included"> Electricity Included</label>
+            <label><input type="checkbox" name="utilities" value="Backup Water"> Backup Water</label>
+            <label><input type="checkbox" name="utilities" value="Backup Solar"> Backup Solar</label>
+          </div>
 
-            <label>Lease Terms</label>
-            <div class="form-row">
-              <select id="lease_term" name="lease_term">
-                <option value="10">Minimum 10 Months</option>
-                <option value="6">Minimum 6 Months</option>
-              </select>
-              <input id="six_month_rooms" name="six_month_rooms" type="number" min="0" placeholder="Rooms for 6 months only" />
-            </div>
-
-            <label for="student_types">Student types (hold Ctrl/Cmd to multi-select)</label>
-            <select id="student_types" name="student_types" multiple size="4" required>
-              <option value="VUT">VUT</option>
-              <option value="NWU">NWU</option>
-              <option value="Sedibeng">Sedibeng</option>
+          <label>Lease Terms</label>
+          <div class="form-row">
+            <select id="lease_term" name="lease_term">
+              <option value="10">Minimum 10 Months</option>
+              <option value="6">Minimum 6 Months</option>
             </select>
+            <input id="six_month_rooms" name="six_month_rooms" type="number" min="0" placeholder="Rooms for 6-month lease" />
+          </div>
 
-            <label for="funding_options">Funding options (hold Ctrl/Cmd to multi-select)</label>
-            <select id="funding_options" name="funding_options" multiple size="3">
-              <option value="Self-funded">Self-funded</option>
-              <option value="Bursary">Bursary</option>
+          <label for="student_types">Student Types <span style="font-weight:400;color:#9ca3af;">(hold Ctrl/Cmd to multi-select)</span></label>
+          <select id="student_types" name="student_types" multiple size="3" required>
+            <option value="VUT">VUT</option>
+            <option value="NWU">NWU</option>
+            <option value="Sedibeng">Sedibeng</option>
+          </select>
+
+          <label for="funding_options">Funding Options <span style="font-weight:400;color:#9ca3af;">(hold Ctrl/Cmd to multi-select)</span></label>
+          <select id="funding_options" name="funding_options" multiple size="2">
+            <option value="Self-funded">Self-funded</option>
+            <option value="Bursary">Bursary</option>
+          </select>
+
+          <label for="description">Description</label>
+          <textarea id="description" name="description" placeholder="Describe the property..."></textarea>
+
+          <label>Deposit & Rooms Available</label>
+          <div class="form-row">
+            <select id="deposit_type" name="deposit_type">
+              <option value="NO">No Deposit</option>
+              <option value="YES">Deposit Required</option>
             </select>
+            <input id="deposit_amount" name="deposit_amount" type="number" min="0" placeholder="Deposit Amount (R)" />
+          </div>
 
-            <label for="description">Description</label>
-            <textarea id="description" name="description" placeholder="Description"></textarea>
+          <input id="rooms_available" name="rooms_available" type="number" min="0" placeholder="Rooms Available" required />
 
-            <label>Deposit & Rooms</label>
-            <div class="form-row">
-              <select id="deposit_type" name="deposit_type">
-                <option value="NO">No Deposit</option>
-                <option value="YES">Deposit Required</option>
-              </select>
-              <input id="deposit_amount" name="deposit_amount" type="number" min="0" placeholder="Deposit Amount (R)" />
-            </div>
+          <label for="images" style="margin-top:14px;">Upload Images</label>
+          <input id="images" name="images" type="file" multiple accept="image/*" />
 
-            <input id="rooms_available" name="rooms_available" type="number" min="1" placeholder="Rooms Available" required />
+          <p id="dupWarning" style="color:#e84f3f;display:none;font-size:13px;font-weight:600;margin-top:8px;padding:10px 14px;background:#fee2e2;border-radius:8px;border:1px solid #fca5a5;"></p>
 
-            <label for="images">Upload images (you can choose multiple)</label>
-            <input id="images" name="images" type="file" multiple accept="image/*" />
+          <div style="display:flex;gap:10px;margin-top:18px;">
+            <button id="saveBtn" type="submit" class="btn btn--primary">Save Property</button>
+            <button id="cancelBtn" type="button" class="btn btn--ghost">Cancel</button>
+          </div>
 
-            <p id="dupWarning" style="color:red; display:none; margin-top:6px;"></p>
+        </form>
+      </div>
 
-            <div style="margin-top:10px;">
-              <button id="saveBtn" type="submit">Save</button>
-              <button id="cancelBtn" type="button" class="muted">Cancel</button>
-            </div>
-
-            <p id="propMsg"></p>
-          </form>
+      <!-- PROPERTY LIST -->
+      <div class="admin-table-wrap">
+        <div class="admin-table-header">
+          <h3>All Properties</h3>
         </div>
+        <div id="listArea" style="padding:8px 0;"></div>
+      </div>
 
-        <div id="listArea"></div>
-
-      </main>
-    </div>
+    </main>
   </div>
 
+  <div class="toast-container" id="toastContainer"></div>
+
   <script src="admin.js"></script>
-
   <script>
-    const form = document.getElementById('propertyForm');
+    const TOKEN = () => localStorage.getItem('admin_token');
+    function logout() { localStorage.removeItem('admin_token'); location.href = '/admin-login.html'; }
 
+    function showToast(msg, type='default') {
+      const c = document.getElementById('toastContainer');
+      const t = document.createElement('div');
+      t.className = `toast ${type}`;
+      t.innerHTML = `<span>${{success:'✅',error:'❌',warning:'⚠️',default:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => { t.style.animation='toastOut 0.3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3500);
+    }
+
+    try {
+      const p = JSON.parse(atob(TOKEN().split('.')[1]));
+      document.getElementById('adminUsername').textContent = p.username || 'Admin';
+      document.getElementById('avatarInitial').textContent = (p.username||'A')[0].toUpperCase();
+    } catch(e) {}
+
+    const form = document.getElementById('propertyForm');
     if (form) {
-      form.addEventListener('submit', (e) => {
-        e.preventDefault();
-        saveProperty();
-      });
+      form.addEventListener('submit', e => { e.preventDefault(); saveProperty(); });
     }
 
     document.getElementById('cancelBtn')?.addEventListener('click', () => {
-      document.getElementById('formArea').style.display = 'none';
+      document.getElementById('formTitle').innerText = 'Add Property';
       document.getElementById('propertyForm').reset();
       document.getElementById('dupWarning').style.display = 'none';
+      document.getElementById('propMsg').textContent = '';
       window.editPropertyId = null;
     });
   </script>
-
 </body>
 </html>
