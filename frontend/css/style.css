@@ -866,11 +866,36 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
 .filter-check:hover { background: var(--bg-alt); }
 
 .filter-check input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  min-width: 16px;
-  accent-color: var(--coral);
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  appearance: none;
+  -webkit-appearance: none;
+  border: 2px solid #d1d5db;
   border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  transition: all 150ms ease;
+  flex-shrink: 0;
+}
+
+.filter-check input[type="checkbox"]:checked {
+  background: var(--coral);
+  border-color: var(--coral);
+}
+
+.filter-check input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 1px;
+  width: 6px;
+  height: 10px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg);
 }
 
 /* ============================================================
@@ -2721,4 +2746,100 @@ body {
   .details-actions .share-btn {
     flex: 1;
   }
+}
+
+
+/* ============================================================
+   ADMIN LAYOUT DEFINITIVE FIX — overrides all previous rules
+   ============================================================ */
+
+/* The old .admin-wrap class used in current HTML */
+.admin-wrap {
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 0 !important;
+  align-items: flex-start !important;
+  width: 100% !important;
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.admin-wrap .admin-sidebar,
+.admin-layout .admin-sidebar {
+  width: 220px !important;
+  min-width: 220px !important;
+  flex-shrink: 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  height: 100vh !important;
+  overflow-y: auto !important;
+  background: #fff !important;
+  border-right: 1px solid var(--border) !important;
+  padding: 20px 14px !important;
+  z-index: 5 !important;
+  box-sizing: border-box !important;
+}
+
+.admin-wrap .admin-main,
+.admin-layout .admin-main {
+  flex: 1 1 0% !important;
+  min-width: 0 !important;          /* critical: prevents flex child overflow */
+  max-width: calc(100% - 220px) !important;
+  overflow-x: hidden !important;
+  padding: 24px 24px !important;
+  box-sizing: border-box !important;
+}
+
+/* Inquiry cards must not overflow their container */
+#inqList,
+.inq-card {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  word-break: break-word !important;
+}
+
+.inq-card-meta,
+.inq-card-header {
+  flex-wrap: wrap !important;
+  max-width: 100% !important;
+}
+
+/* Property table */
+#listArea {
+  max-width: 100% !important;
+  overflow-x: auto !important;
+}
+
+/* Mobile: stack sidebar above content */
+@media (max-width: 768px) {
+  .admin-wrap,
+  .admin-layout {
+    flex-direction: column !important;
+  }
+
+  .admin-wrap .admin-sidebar,
+  .admin-layout .admin-sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: 100% !important;
+    height: auto !important;
+    position: static !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border) !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 4px !important;
+    padding: 12px 14px !important;
+  }
+
+  .admin-wrap .admin-main,
+  .admin-layout .admin-main {
+    max-width: 100% !important;
+    padding: 16px 14px !important;
+  }
+
+  .sidebar-section-label { display: none !important; }
+  .sidebar-logout { margin-top: 0 !important; padding-top: 0 !important; border: none !important; }
 }
