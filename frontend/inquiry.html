@@ -730,6 +730,20 @@
       else { clearErr('phone', 'phoneErr'); markValid('phone'); }
     });
 
+
+    // ---- Show inline error message ----
+    function showDuplicateError(msg) {
+      let errBox = document.getElementById('submitError');
+      if (!errBox) {
+        errBox = document.createElement('div');
+        errBox.id = 'submitError';
+        errBox.style.cssText = 'margin-top:14px;padding:14px 16px;background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;font-size:13px;font-weight:600;color:#dc2626;text-align:center;line-height:1.6;';
+        document.getElementById('submitBtn').insertAdjacentElement('afterend', errBox);
+      }
+      errBox.textContent = '⚠️ ' + msg;
+      errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     // ---- Submit ----
     async function submitInquiry() {
       // Validate
@@ -781,12 +795,15 @@
         const data = await res.json();
 
         if (res.ok) {
-          // Show success
           document.getElementById('formBody').style.display = 'none';
           document.getElementById('successState').classList.add('show');
+        } else if (res.status === 409) {
+          // Duplicate inquiry
+          btn.classList.remove('loading');
+          showDuplicateError(data.message || 'You already sent an inquiry for this property.');
         } else {
           btn.classList.remove('loading');
-          alert(data.message || data.error || 'Failed to send inquiry. Please try again.');
+          showDuplicateError(data.message || 'Failed to send inquiry. Please try again.');
         }
 
       } catch (err) {

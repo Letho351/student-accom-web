@@ -89,12 +89,32 @@ app.post('/inquiries', async (req, res) => {
     propertyId, property_name
   } = req.body;
 
+  // ---- DUPLICATE CHECK: same email OR same phone for same property ----
   let house = property_name || null;
   if (!house && propertyId) {
     const [p] = await db.query(
       'SELECT title FROM properties WHERE id = ?', [propertyId]
     );
     if (p.length) house = p[0].title;
+  }
+
+  if (email || phone) {
+    const [existing] = await db.query(
+      `SELECT id FROM inquiries
+       WHERE house = ?
+         AND (
+           (email IS NOT NULL AND email = ?) OR
+           (phone IS NOT NULL AND phone = ?)
+         )
+       LIMIT 1`,
+      [house, email || null, phone || null]
+    );
+
+    if (existing.length) {
+      return res.status(409).json({
+        message: 'You have already submitted an inquiry for this property. Our team will contact you soon!'
+      });
+    }
   }
 
   const [result] = await db.query(
