@@ -2,105 +2,811 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Contact / Inquiry</title>
- <link rel="stylesheet" href="/css/style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Send Inquiry — StudentAccomo</title>
+  <meta name="description" content="Inquire about student accommodation near VUT. We'll connect you with the right landlord fast." />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css" />
+
+  <style>
+    .inquiry-page { padding: 40px 0 72px; }
+
+    /* Two column layout on desktop */
+    .inquiry-layout {
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 32px;
+      align-items: start;
+    }
+
+    /* Left — form card */
+    .inquiry-card {
+      background: var(--card);
+      border-radius: var(--radius-xl);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+    }
+
+    .inquiry-card-header {
+      background: var(--navy);
+      padding: 28px 32px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .inquiry-card-header::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(232,79,63,0.2), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .inquiry-card-header::after {
+      content: '';
+      position: absolute;
+      bottom: -40px; left: 20px;
+      width: 140px; height: 140px;
+      background: radial-gradient(circle, rgba(245,166,35,0.12), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .inquiry-card-header h2 {
+      color: #fff;
+      font-size: 24px;
+      margin-bottom: 6px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .inquiry-card-header p {
+      color: rgba(255,255,255,0.5);
+      font-size: 13px;
+      position: relative;
+      z-index: 1;
+      margin: 0;
+    }
+
+    .inquiry-card-body {
+      padding: 32px;
+    }
+
+    /* Property badge */
+    .selected-property {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 16px;
+      background: var(--coral-glow);
+      border: 1px solid rgba(232,79,63,0.2);
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+    }
+
+    .selected-property-icon {
+      width: 36px; height: 36px;
+      background: var(--coral);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .selected-property-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .selected-property-text .label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.7px;
+      color: var(--coral);
+      margin-bottom: 2px;
+    }
+
+    .selected-property-text .name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* Form field groups */
+    .field-group {
+      margin-bottom: 18px;
+    }
+
+    .field-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-secondary);
+      margin-bottom: 7px;
+    }
+
+    .field-group label .req {
+      color: var(--coral);
+      font-size: 14px;
+      line-height: 1;
+    }
+
+    .field-error {
+      font-size: 12px;
+      color: var(--full);
+      font-weight: 500;
+      margin-top: 5px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .field-error.show { display: flex; }
+
+    input.error, select.error, textarea.error {
+      border-color: var(--full) !important;
+      box-shadow: 0 0 0 3px rgba(220,38,38,0.1) !important;
+    }
+
+    input.valid, select.valid {
+      border-color: var(--available) !important;
+    }
+
+    /* Contact preference pills */
+    .contact-pills {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .contact-pill {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 10px 16px;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all var(--duration-fast);
+      background: var(--card);
+      user-select: none;
+    }
+
+    .contact-pill:hover {
+      border-color: var(--coral);
+      color: var(--coral);
+    }
+
+    .contact-pill input[type="radio"] {
+      display: none;
+    }
+
+    .contact-pill.selected {
+      border-color: var(--coral);
+      background: var(--coral-glow);
+      color: var(--coral);
+    }
+
+    /* Submit button */
+    .submit-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--coral);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 15px;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      cursor: pointer;
+      transition: all var(--duration-normal) var(--ease-smooth);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .submit-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1), transparent);
+      opacity: 0;
+      transition: opacity 200ms;
+    }
+
+    .submit-btn:hover::after { opacity: 1; }
+    .submit-btn:hover { background: var(--coral-light); transform: translateY(-2px); box-shadow: var(--shadow-coral); }
+    .submit-btn:active { transform: scale(0.98); }
+    .submit-btn.loading { opacity: 0.8; pointer-events: none; }
+
+    .submit-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .submit-btn.loading .submit-spinner { display: block; }
+    .submit-btn.loading .submit-text { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Success state */
+    .success-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 48px 32px;
+    }
+
+    .success-state.show { display: flex; }
+
+    .success-circle {
+      width: 88px; height: 88px;
+      background: var(--available-bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 40px;
+      margin-bottom: 20px;
+      animation: popIn 0.5s var(--ease-spring);
+      border: 3px solid rgba(22,163,74,0.2);
+    }
+
+    .success-state h3 {
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+    }
+
+    .success-state p {
+      color: var(--text-secondary);
+      font-size: 14px;
+      max-width: 300px;
+      line-height: 1.7;
+      margin-bottom: 24px;
+    }
+
+    /* Right sidebar */
+    .inquiry-sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+    .sidebar-card {
+      background: var(--card);
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+      padding: 22px;
+    }
+
+    .sidebar-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 14px;
+      color: var(--text-primary);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .sidebar-step {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+
+    .sidebar-step:last-child { margin-bottom: 0; }
+
+    .step-num {
+      width: 26px; height: 26px;
+      background: var(--coral-glow);
+      color: var(--coral);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .step-text h5 {
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 2px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .step-text p {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* WhatsApp alternative card */
+    .wa-card {
+      background: linear-gradient(135deg, #075e54, #128c7e);
+      border-radius: var(--radius-lg);
+      padding: 22px;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .wa-card::before {
+      content: '';
+      position: absolute;
+      top: -30px; right: -30px;
+      width: 120px; height: 120px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+    }
+
+    .wa-card h4 {
+      font-size: 15px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wa-card p {
+      font-size: 12px;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 14px;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+    }
+
+    .wa-card .wa-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      background: #25d366;
+      color: #fff;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: all var(--duration-fast);
+      position: relative;
+      z-index: 1;
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .wa-card .wa-btn:hover {
+      background: #20bd5a;
+      transform: translateY(-1px);
+    }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .inquiry-layout { grid-template-columns: 1fr; }
+      .inquiry-sidebar { order: -1; }
+      .inquiry-sidebar .sidebar-card:not(.wa-card-wrap) { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      .inquiry-page { padding: 24px 0 56px; }
+      .inquiry-card-header { padding: 22px 20px; }
+      .inquiry-card-header h2 { font-size: 20px; }
+      .inquiry-card-body { padding: 20px 18px; }
+      .contact-pills { gap: 6px; }
+      .contact-pill { padding: 9px 13px; font-size: 12px; }
+    }
+  </style>
 </head>
+
 <body>
-  <header class="topbar">
-    <div class="brand">Your Accommodation</div>
+
+  <!-- TOPBAR -->
+  <header class="topbar" id="topbar">
+    <a href="/" class="brand">StudentAccomo<span class="brand-dot"></span></a>
     <nav>
       <a href="/">Home</a>
-      <a href="/property.html">About</a>
-      <a href="/inquiry.html">Contact</a>
+      <a href="/#about">About</a>
+      <a href="/inquiry.html" class="active">Contact</a>
     </nav>
+    <div class="topbar-right">
+      <button class="admin-login-btn" onclick="window.location.href='/admin-login.html'">Admin Login</button>
+      <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
   </header>
 
-  <main class="container narrow">
-    <h2>Send an inquiry</h2>
+  <!-- Mobile Nav -->
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="/">🏠 Home</a>
+    <a href="/#about">ℹ️ About</a>
+    <a href="/inquiry.html">✉️ Contact</a>
+    <a href="/admin-login.html" style="color:var(--coral);font-weight:700;">🔐 Admin Login</a>
+  </nav>
 
-    <form id="inqForm">
-      <label>Full name</label>
-      <input id="name" required />
+  <main class="container inquiry-page">
 
-      <label>Email</label>
-      <input id="email" type="email" required />
+    <div class="inquiry-layout">
 
-      <label>Phone (WhatsApp)</label>
-      <input id="phone" required />
+      <!-- ============ LEFT: FORM ============ -->
+      <div class="inquiry-card">
 
-      <label>Preferred contact</label>
-      <select id="preferred_contact" required>
-        <option value="whatsapp">WhatsApp</option>
-        <option value="email">Email</option>
-        <option value="phone">Phone call</option>
-      </select>
+        <!-- Header -->
+        <div class="inquiry-card-header">
+          <h2>Send an Inquiry</h2>
+          <p>Fill in your details and we'll get back to you as soon as possible.</p>
+        </div>
 
-      <label>Property</label>
-      <select id="propertySelect" required>
-        <option value="">Loading properties...</option>
-      </select>
+        <!-- Form body -->
+        <div class="inquiry-card-body" id="formBody">
 
-      <label>Message (optional)</label>
-      <textarea id="message" rows="4"></textarea>
+          <!-- Selected property badge (shown when coming from property page) -->
+          <div class="selected-property" id="selectedPropertyBadge" style="display:none;">
+            <div class="selected-property-icon">🏠</div>
+            <div class="selected-property-text">
+              <div class="label">Inquiring about</div>
+              <div class="name" id="selectedPropertyName">Loading...</div>
+            </div>
+          </div>
 
-      <button type="submit" class="button">Send inquiry</button>
-    </form>
+          <!-- Property select (shown when no propertyId in URL) -->
+          <div class="field-group" id="propertySelectGroup">
+            <label>🏠 Property <span class="req">*</span></label>
+            <select id="propertySelect">
+              <option value="">Loading properties...</option>
+            </select>
+            <div class="field-error" id="propertyErr">⚠️ Please select a property</div>
+          </div>
 
-    <p id="formMsg" class="muted"></p>
+          <!-- Name -->
+          <div class="field-group">
+            <label>👤 Full Name <span class="req">*</span></label>
+            <input id="name" type="text" placeholder="e.g. Thabo Mokoena" autocomplete="name" />
+            <div class="field-error" id="nameErr">⚠️ Please enter your full name</div>
+          </div>
+
+          <!-- Email & Phone -->
+          <div class="form-row">
+            <div class="field-group" style="margin-bottom:0;">
+              <label>✉️ Email <span class="req">*</span></label>
+              <input id="email" type="email" placeholder="your@email.com" autocomplete="email" />
+              <div class="field-error" id="emailErr">⚠️ Enter a valid email address</div>
+            </div>
+            <div class="field-group" style="margin-bottom:0;">
+              <label>📱 Phone / WhatsApp <span class="req">*</span></label>
+              <input id="phone" type="tel" placeholder="e.g. 079 151 6769" autocomplete="tel" />
+              <div class="field-error" id="phoneErr">⚠️ Please enter your phone number</div>
+            </div>
+          </div>
+
+          <!-- Preferred contact -->
+          <div class="field-group" style="margin-top:18px;">
+            <label>💬 Preferred Contact Method <span class="req">*</span></label>
+            <div class="contact-pills">
+              <label class="contact-pill selected" id="pill-whatsapp">
+                <input type="radio" name="preferred_contact" value="whatsapp" checked />
+                <span>📱</span> WhatsApp
+              </label>
+              <label class="contact-pill" id="pill-email">
+                <input type="radio" name="preferred_contact" value="email" />
+                <span>✉️</span> Email
+              </label>
+              <label class="contact-pill" id="pill-phone">
+                <input type="radio" name="preferred_contact" value="phone" />
+                <span>📞</span> Phone Call
+              </label>
+            </div>
+          </div>
+
+          <!-- Message -->
+          <div class="field-group" style="margin-top:18px;">
+            <label>💭 Message <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <textarea id="message" rows="4" placeholder="Any specific questions? e.g. move-in date, viewing request..."></textarea>
+          </div>
+
+          <!-- Submit -->
+          <button class="submit-btn" id="submitBtn" onclick="submitInquiry()">
+            <span class="submit-text">✉️ Send Inquiry</span>
+            <span class="submit-spinner"></span>
+          </button>
+
+          <p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;">
+            🔒 Your details are kept private and only shared with our admin team.
+          </p>
+
+        </div>
+
+        <!-- Success state -->
+        <div class="success-state" id="successState">
+          <div class="success-circle">✅</div>
+          <h3>Inquiry Sent!</h3>
+          <p>Thanks! We've received your inquiry and will contact you via your preferred method shortly.</p>
+          <a href="/" class="btn btn--primary">← Browse More Properties</a>
+          <button
+            onclick="resetForm()"
+            class="btn btn--ghost"
+            style="margin-top:10px;">
+            Send Another Inquiry
+          </button>
+        </div>
+
+      </div>
+
+      <!-- ============ RIGHT: SIDEBAR ============ -->
+      <div class="inquiry-sidebar">
+
+        <!-- How it works -->
+        <div class="sidebar-card">
+          <h4>How It Works</h4>
+
+          <div class="sidebar-step">
+            <div class="step-num">1</div>
+            <div class="step-text">
+              <h5>Submit Your Inquiry</h5>
+              <p>Fill in your details and the property you're interested in.</p>
+            </div>
+          </div>
+
+          <div class="sidebar-step">
+            <div class="step-num">2</div>
+            <div class="step-text">
+              <h5>We Review It</h5>
+              <p>Our admin team receives your inquiry and contacts the landlord.</p>
+            </div>
+          </div>
+
+          <div class="sidebar-step">
+            <div class="step-num">3</div>
+            <div class="step-text">
+              <h5>We Contact You</h5>
+              <p>We reach out via your preferred method — usually within 24 hours.</p>
+            </div>
+          </div>
+
+          <div class="sidebar-step">
+            <div class="step-num">4</div>
+            <div class="step-text">
+              <h5>Schedule a Viewing</h5>
+              <p>Visit the property and secure your room when you're happy.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp alternative -->
+        <div class="sidebar-card wa-card-wrap">
+          <div class="wa-card">
+            <h4>Prefer WhatsApp?</h4>
+            <p>Message us directly on WhatsApp and we'll help you find the right place.</p>
+            <a
+              class="wa-btn"
+              href="https://wa.me/27791516769?text=Hi%2C%20I'm%20looking%20for%20student%20accommodation%20near%20VUT.%20Can%20you%20help%3F"
+              target="_blank"
+              rel="noopener">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              Chat on WhatsApp
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
   </main>
 
+  <!-- Floating WhatsApp -->
+  <a class="fab-whatsapp" href="https://wa.me/27791516769?text=Hi%2C%20I%20found%20StudentAccomo%20and%20I'm%20looking%20for%20accommodation%20near%20VUT." target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+    <div class="fab-tooltip">Chat with us</div>
+    <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+  </a>
+
   <script>
-    async function loadPropertiesIntoSelect() {
+    'use strict';
+
+    const WA_NUMBER = '27791516769';
+
+    // ---- Topbar scroll ----
+    const topbar = document.getElementById('topbar');
+    window.addEventListener('scroll', () => {
+      topbar.classList.toggle('scrolled', window.scrollY > 20);
+    }, { passive: true });
+
+    // ---- Hamburger ----
+    const hamburger = document.getElementById('hamburger');
+    const mobileNav = document.getElementById('mobileNav');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileNav.classList.toggle('open');
+    });
+
+    // ---- Contact pills ----
+    document.querySelectorAll('.contact-pill').forEach(pill => {
+      pill.addEventListener('click', () => {
+        document.querySelectorAll('.contact-pill').forEach(p => p.classList.remove('selected'));
+        pill.classList.add('selected');
+        pill.querySelector('input[type="radio"]').checked = true;
+      });
+    });
+
+    // ---- Load properties into select ----
+    async function loadProperties() {
       try {
-        const res = await fetch('/properties');
+        const res  = await fetch('/properties');
         const list = await res.json();
-        const sel = document.getElementById('propertySelect');
-        sel.innerHTML = '<option value="">Choose a property</option>';
+        const sel  = document.getElementById('propertySelect');
+
+        sel.innerHTML = '<option value="">— Choose a property —</option>';
         list.forEach(p => {
-          const opt = document.createElement('option');
-          opt.value = p.id;
-          opt.text = `${p.title} – (R${p.price || 'n/a'}, ${p.location || ''})`;
+          const opt   = document.createElement('option');
+          opt.value   = p.id;
+          opt.text    = `${p.title} — R${p.price ? Number(p.price).toLocaleString() : 'n/a'}/mo — ${p.location || ''}`;
           sel.appendChild(opt);
         });
 
+        // Check for ?propertyId= in URL
         const params = new URLSearchParams(window.location.search);
-        const propId = params.get('propertyId');
-        if (propId) sel.value = propId;
+        const pid    = params.get('propertyId');
+
+        if (pid) {
+          sel.value = pid;
+
+          // Show selected property badge instead of the select
+          const selected = list.find(p => String(p.id) === String(pid));
+          if (selected) {
+            document.getElementById('selectedPropertyName').textContent =
+              `${selected.title} — R${selected.price ? Number(selected.price).toLocaleString() : 'n/a'}/mo`;
+            document.getElementById('selectedPropertyBadge').style.display = 'flex';
+            document.getElementById('propertySelectGroup').style.display = 'none';
+          }
+        }
+
       } catch (err) {
         console.error(err);
-        document.getElementById('propertySelect').innerHTML = '<option value="">Error loading</option>';
+        document.getElementById('propertySelect').innerHTML =
+          '<option value="">Error loading properties</option>';
       }
     }
 
-    loadPropertiesIntoSelect();
+    loadProperties();
 
-    document.getElementById('inqForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const payload = {
-        name: document.getElementById('name').value,
-        email: document.getElementById('email').value,
-        phone: document.getElementById('phone').value,
-        preferred_contact: document.getElementById('preferred_contact').value,
-        propertyId: document.getElementById('propertySelect').value,
-        property_name: document.getElementById('propertySelect').selectedOptions[0].text,
-        message: document.getElementById('message').value || null
-      };
+    // ---- Validation helpers ----
+    function showErr(fieldId, errId) {
+      document.getElementById(fieldId).classList.add('error');
+      document.getElementById(errId).classList.add('show');
+    }
 
-      const res = await fetch('/inquiries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+    function clearErr(fieldId, errId) {
+      document.getElementById(fieldId).classList.remove('error');
+      document.getElementById(errId).classList.remove('show');
+    }
+
+    function markValid(fieldId) {
+      document.getElementById(fieldId).classList.add('valid');
+    }
+
+    // Live validation on blur
+    document.getElementById('name').addEventListener('blur', function() {
+      if (this.value.trim().length < 2) showErr('name', 'nameErr');
+      else { clearErr('name', 'nameErr'); markValid('name'); }
+    });
+
+    document.getElementById('email').addEventListener('blur', function() {
+      const valid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.value.trim());
+      if (!valid) showErr('email', 'emailErr');
+      else { clearErr('email', 'emailErr'); markValid('email'); }
+    });
+
+    document.getElementById('phone').addEventListener('blur', function() {
+      if (this.value.trim().length < 9) showErr('phone', 'phoneErr');
+      else { clearErr('phone', 'phoneErr'); markValid('phone'); }
+    });
+
+    // ---- Submit ----
+    async function submitInquiry() {
+      // Validate
+      let valid = true;
+
+      const name  = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const phone = document.getElementById('phone').value.trim();
+      const propId = document.getElementById('propertySelect').value;
+      const preferred = document.querySelector('input[name="preferred_contact"]:checked')?.value || 'whatsapp';
+      const message = document.getElementById('message').value.trim();
+
+      // Clear all errors first
+      ['name','email','phone','propertySelect'].forEach(id => {
+        document.getElementById(id).classList.remove('error','valid');
+      });
+      ['nameErr','emailErr','phoneErr','propertyErr'].forEach(id => {
+        document.getElementById(id).classList.remove('show');
       });
 
-      const data = await res.json();
-      if (res.ok) {
-        document.getElementById('formMsg').innerText = data.message || 'Inquiry sent!';
-        document.getElementById('inqForm').reset();
-      } else {
-        document.getElementById('formMsg').innerText = (data.message || data.error) || 'Failed to send';
+      if (name.length < 2)                               { showErr('name', 'nameErr'); valid = false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))    { showErr('email', 'emailErr'); valid = false; }
+      if (phone.length < 9)                              { showErr('phone', 'phoneErr'); valid = false; }
+      if (!propId)                                       { showErr('propertySelect', 'propertyErr'); valid = false; }
+
+      if (!valid) {
+        // Scroll to first error
+        document.querySelector('.error')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
       }
-    });
+
+      // Loading state
+      const btn = document.getElementById('submitBtn');
+      btn.classList.add('loading');
+
+      try {
+        const res = await fetch('/inquiries', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name, email, phone,
+            preferred_contact: preferred,
+            propertyId: propId,
+            property_name: document.getElementById('propertySelect').selectedOptions[0]?.text || '',
+            message: message || null
+          })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          // Show success
+          document.getElementById('formBody').style.display = 'none';
+          document.getElementById('successState').classList.add('show');
+        } else {
+          btn.classList.remove('loading');
+          alert(data.message || data.error || 'Failed to send inquiry. Please try again.');
+        }
+
+      } catch (err) {
+        console.error(err);
+        btn.classList.remove('loading');
+        alert('Server error. Please try again or contact us on WhatsApp.');
+      }
+    }
+
+    // ---- Reset form ----
+    function resetForm() {
+      document.getElementById('successState').classList.remove('show');
+      document.getElementById('formBody').style.display = 'block';
+      document.getElementById('submitBtn').classList.remove('loading');
+      document.querySelectorAll('input:not([type=radio]), textarea, select').forEach(el => el.value = '');
+      document.querySelectorAll('.contact-pill').forEach(p => p.classList.remove('selected'));
+      document.querySelector('#pill-whatsapp').classList.add('selected');
+      document.querySelector('input[value="whatsapp"]').checked = true;
+    }
   </script>
+
 </body>
 </html>
