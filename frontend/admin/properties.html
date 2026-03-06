@@ -237,7 +237,6 @@
 
   <script src="admin.js"></script>
   <script>
-    const TOKEN = () => localStorage.getItem('admin_token');
     function logout() { localStorage.removeItem('admin_token'); location.href = '/admin-login.html'; }
 
     function showToast(msg, type='default') {

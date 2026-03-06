@@ -317,18 +317,8 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
     imageVals.push(urls.join(','));
   }
 
-  await db.query(
-    `UPDATE properties SET
-      title=?, location=?, price=?, description=?,
-      room_type=?, student_types=?, funding_options=?,
-      deposit_type=?, deposit_amount=?,
-      rooms_available=?, distance_from_campus=?, walking_time=?,
-      transport_options=?, security_features=?,
-      amenities=?, utilities=?,
-      lease_terms=?, room_includes=?, six_month_rooms=?
-      ${imageSql}
-     WHERE id=?`,
-    [
+  try {
+    const values = [
       title || null,
       location || null,
       price || null,
@@ -337,7 +327,7 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
       student_types || null,
       funding_options || null,
       deposit_type || 'NO',
-      deposit_type === 'YES' ? deposit_amount : null,
+      deposit_type === 'YES' ? (deposit_amount || null) : null,
       rooms_available || null,
       distance_km || null,
       walking_time || null,
@@ -350,10 +340,30 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
       six_month_rooms || null,
       ...imageVals,
       id
-    ]
-  );
+    ];
 
-  res.json({ message: 'Property updated' });
+    console.log('PUT /properties/:id values:', values);
+
+    await db.query(
+      `UPDATE properties SET
+        title=?, location=?, price=?, description=?,
+        room_type=?, student_types=?, funding_options=?,
+        deposit_type=?, deposit_amount=?,
+        rooms_available=?, distance_from_campus=?, walking_time=?,
+        transport_options=?, security_features=?,
+        amenities=?, utilities=?,
+        lease_terms=?, room_includes=?, six_month_rooms=?
+        ${imageSql}
+       WHERE id=?`,
+      values
+    );
+
+    res.json({ message: 'Property updated' });
+
+  } catch (err) {
+    console.error('PUT /properties/:id ERROR:', err);
+    res.status(500).json({ message: 'Failed to update property', error: err.message });
+  }
 });
 
 // ---------------- DELETE PROPERTY ----------------
