@@ -290,15 +290,16 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
 app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (req, res) => {
   const id = req.params.id;
 
+  // Field names match exactly what admin.js FormData sends
   const {
     title, location, price, description,
     room_type, student_types, funding_options,
     deposit_type, deposit_amount,
     rooms_available,
     distance_km, walking_time,
-    transport, security,
+    transport_options, security_features,   // fixed: was 'transport','security'
     amenities, utilities,
-    lease_term, room_includes,
+    lease_term, room_includes,               // fixed: server now uses lease_term
     six_month_rooms
   } = req.body;
 
@@ -328,14 +329,25 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
       ${imageSql}
      WHERE id=?`,
     [
-      title || null, location || null, price || null, description || null,
-      room_type || null, student_types || null, funding_options || null,
+      title || null,
+      location || null,
+      price || null,
+      description || null,
+      room_type || null,
+      student_types || null,
+      funding_options || null,
       deposit_type || 'NO',
       deposit_type === 'YES' ? deposit_amount : null,
-      rooms_available || null, distance_km || null, walking_time || null,
-      normalize(transport), normalize(security),
-      normalize(amenities), normalize(utilities),
-      lease_term || null, room_includes || null, six_month_rooms || null,
+      rooms_available || null,
+      distance_km || null,
+      walking_time || null,
+      normalize(transport_options),
+      normalize(security_features),
+      normalize(amenities),
+      normalize(utilities),
+      lease_term || null,
+      room_includes || null,
+      six_month_rooms || null,
       ...imageVals,
       id
     ]
