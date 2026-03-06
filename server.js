@@ -336,7 +336,6 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
       normalize(utilities),
       lease_term || null,
       room_includes || null,
-      six_month_rooms || null,
       ...imageVals,
       id
     ];
@@ -351,7 +350,7 @@ app.put('/properties/:id', authMiddleware, upload.array('images', 10), async (re
         rooms_available=?, distance_from_campus=?, walking_time=?,
         transport_options=?, security_features=?,
         amenities=?, utilities=?,
-        lease_terms=?, room_includes=?, six_month_rooms=?
+        lease_terms=?, room_includes=?
         ${imageSql}
        WHERE id=?`,
       values
