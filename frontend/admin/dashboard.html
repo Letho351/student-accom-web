@@ -9,132 +9,399 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+
   <style>
-    /* ADMIN MOBILE FIX */
-    @media (max-width: 768px) {
-      .admin-topbar { padding: 0 14px !important; height: 54px !important; }
-      .admin-topbar .brand { font-size: 15px !important; }
-      .admin-user-badge span:not(.avatar) { display: none !important; }
-      .page-body { flex-direction: column !important; }
-      .admin-aside {
-        width: 100% !important; min-width: unset !important;
-        height: auto !important; position: static !important;
-        border-right: none !important;
-        border-bottom: 1px solid #e5e7eb !important;
-        flex-direction: row !important; flex-wrap: nowrap !important;
-        overflow-x: auto !important; overflow-y: hidden !important;
-        padding: 10px 12px !important; gap: 6px !important;
-        -webkit-overflow-scrolling: touch; scrollbar-width: none;
-      }
-      .admin-aside::-webkit-scrollbar { display: none; }
-      .nav-label { display: none !important; }
-      .admin-aside .menu-item {
-        flex-shrink: 0 !important; white-space: nowrap !important;
-        padding: 8px 12px !important; font-size: 13px !important;
-      }
-      .admin-aside .sidebar-logout {
-        margin-top: 0 !important; padding-top: 0 !important;
-        border-top: none !important; margin-left: auto !important;
-        flex-shrink: 0 !important;
-      }
-      .admin-content, main { padding: 16px 14px !important; overflow-x: hidden !important; }
-      .stats-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; }
-      .stat-card { padding: 14px 12px !important; }
-      .stat-card-num { font-size: 22px !important; }
-      .charts-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
-      .admin-table-wrap { overflow-x: auto !important; }
-      .table { min-width: 480px; }
-      .form-row { grid-template-columns: 1fr !important; }
-      .checkbox-grid { grid-template-columns: 1fr 1fr !important; }
-      h1 { font-size: 20px !important; }
+    * { box-sizing: border-box; }
+
+    body { margin: 0; background: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; }
+
+    /* ---- TOP BAR ---- */
+    .admin-topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      height: 60px;
+      background: var(--navy);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
     }
+
+    .admin-topbar .brand {
+      font-family: 'Syne', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      color: #fff;
+    }
+
+    .admin-topbar .brand span { color: var(--coral); }
+    .admin-topbar .brand-sub {
+      font-size: 12px;
+      color: rgba(255,255,255,0.35);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 500;
+      margin-left: 6px;
+    }
+
+    .admin-user-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .avatar {
+      width: 32px; height: 32px;
+      background: var(--coral);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      flex-shrink: 0;
+    }
+
+    /* ---- PAGE BODY ---- */
+    .page-body {
+      display: flex;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ---- SIDEBAR ---- */
+    .admin-aside {
+      width: 220px;
+      flex-shrink: 0;
+      background: #fff;
+      border-right: 1px solid #e5e7eb;
+      padding: 20px 14px;
+      position: sticky;
+      top: 60px;
+      height: calc(100vh - 60px);
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: #9ca3af;
+      padding: 0 10px;
+      margin-bottom: 8px;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      transition: all 150ms ease;
+      user-select: none;
+    }
+
+    .menu-item:hover { background: #f9fafb; }
+    .menu-item.active { background: var(--coral-glow); color: var(--coral); }
+
+    .menu-icon { font-size: 16px; flex-shrink: 0; }
+
+    .sidebar-logout {
+      margin-top: auto;
+      padding-top: 16px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    /* ---- MAIN CONTENT ---- */
+    .admin-content {
+      flex: 1;
+      min-width: 0;
+      padding: 28px;
+      overflow-x: hidden;
+    }
+
+    /* ---- STATS GRID ---- */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .stat-card-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .stat-card-icon.navy  { background: #eff6ff; }
+    .stat-card-icon.green { background: #f0fdf4; }
+    .stat-card-icon.coral { background: #fff1f0; }
+    .stat-card-icon.gold  { background: #fffbeb; }
+
+    .stat-card-num {
+      font-size: 32px;
+      font-weight: 800;
+      color: #0d0f1a;
+      font-family: 'Syne', sans-serif;
+      line-height: 1;
+    }
+
+    .stat-card-label {
+      font-size: 13px;
+      color: #9ca3af;
+      font-weight: 500;
+    }
+
+    /* ---- CHARTS ---- */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .chart-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .chart-card h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin: 0 0 16px;
+      color: #0d0f1a;
+    }
+
+    /* ---- RECENT TABLE ---- */
+    .recent-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .recent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid #f3f4f6;
+    }
+
+    .recent-header h3 { font-size: 15px; font-weight: 700; margin: 0; }
+
+    .recent-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      border-bottom: 1px solid #f9fafb;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .recent-row:last-child { border-bottom: none; }
+
+    .status-pill {
+      padding: 3px 10px;
+      border-radius: 99px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    /* ---- MOBILE ---- */
+    @media (max-width: 768px) {
+      .admin-topbar { padding: 0 14px; height: 54px; }
+      .admin-topbar .brand { font-size: 15px; }
+      .admin-user-badge .username { display: none; }
+
+      .page-body { flex-direction: column; }
+
+      .admin-aside {
+        width: 100%;
+        height: auto;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid #e5e7eb;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 10px 12px;
+        gap: 4px;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+      }
+
+      .admin-aside::-webkit-scrollbar { display: none; }
+      .nav-label { display: none; }
+
+      .menu-item {
+        flex-shrink: 0;
+        white-space: nowrap;
+        padding: 8px 12px;
+        font-size: 13px;
+      }
+
+      .sidebar-logout {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+        margin-left: auto;
+        flex-shrink: 0;
+      }
+
+      .admin-content { padding: 16px 14px; }
+
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .stat-card { padding: 14px 12px; }
+      .stat-card-num { font-size: 26px; }
+
+      .charts-grid { grid-template-columns: 1fr; }
+
+      h1 { font-size: 20px; }
+    }
+
     @media (max-width: 480px) {
-      .admin-aside .menu-item .menu-text { display: none !important; }
-      .admin-aside .menu-item { padding: 10px !important; justify-content: center !important; }
-      .admin-aside .menu-item .menu-icon { font-size: 20px !important; margin: 0 !important; }
-      .admin-aside { justify-content: space-around !important; padding: 8px !important; }
-      .stats-grid { grid-template-columns: 1fr 1fr !important; }
+      .menu-item .menu-text { display: none; }
+      .menu-item { padding: 10px; justify-content: center; }
+      .menu-icon { font-size: 20px; margin: 0; }
+      .admin-aside { justify-content: space-around; padding: 8px; }
+      .stats-grid { grid-template-columns: 1fr 1fr; }
     }
   </style>
 </head>
-<body style="margin:0;background:var(--bg)">
+<body>
 
   <script>if (!localStorage.getItem('admin_token')) location.href = '/admin-login.html';</script>
 
   <!-- TOP BAR -->
   <div class="admin-topbar">
-    <div class="brand">Student<span>Accomo</span> <span style="font-size:12px;color:rgba(255,255,255,0.35);font-family:'Plus Jakarta Sans',sans-serif;font-weight:500;">Admin</span></div>
-    <div class="admin-topbar-right">
-      <div class="admin-user-badge">
-        <div class="avatar" id="avatarInitial">A</div>
-        <span id="adminUsername">Admin</span>
-      </div>
+    <div class="brand">Student<span>Accomo</span><span class="brand-sub">Admin</span></div>
+    <div class="admin-user-badge">
+      <div class="avatar" id="avatarInitial">A</div>
+      <span class="username" id="adminUsername">Admin</span>
     </div>
   </div>
 
   <!-- PAGE BODY -->
-  <div class="page-body" style="display:flex;min-height:calc(100vh - 60px)">
+  <div class="page-body">
 
     <!-- SIDEBAR -->
-    <aside id="sidebar" class="admin-aside" style="width:220px;min-width:220px;flex-shrink:0;background:#fff;border-right:1px solid #e5e7eb;padding:20px 14px;position:sticky;top:60px;height:calc(100vh - 60px);overflow-y:auto;box-sizing:border-box;display:flex;flex-direction:column;">
-      <div class="nav-label" style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.2px;color:#9ca3af;padding:0 10px;margin-bottom:8px;">Navigation</div>
+    <aside class="admin-aside">
+      <div class="nav-label">Navigation</div>
 
       <div class="menu-item active" onclick="location.href='dashboard.html'">
-        <span class="menu-icon">📊</span> <span class="menu-text">Dashboard</span>
+        <span class="menu-icon">📊</span>
+        <span class="menu-text">Dashboard</span>
       </div>
       <div class="menu-item" onclick="location.href='properties.html'">
-        <span class="menu-icon">🏠</span> <span class="menu-text">Properties</span>
+        <span class="menu-icon">🏠</span>
+        <span class="menu-text">Properties</span>
       </div>
       <div class="menu-item" onclick="location.href='inquiries.html'">
-        <span class="menu-icon">💬</span> <span class="menu-text">Student Inquiries</span>
-        <span class="badge-count" id="newInqCount" style="display:none"></span>
+        <span class="menu-icon">💬</span>
+        <span class="menu-text">Inquiries</span>
+        <span id="newInqCount" style="display:none;background:var(--coral);color:#fff;border-radius:99px;font-size:10px;font-weight:700;padding:1px 7px;margin-left:auto;"></span>
       </div>
       <div class="menu-item" onclick="location.href='settings.html'">
-        <span class="menu-icon">⚙️</span> <span class="menu-text">Settings</span>
+        <span class="menu-icon">⚙️</span>
+        <span class="menu-text">Settings</span>
       </div>
 
-      <div style="margin-top:auto;padding-top:16px;border-top:1px solid #e5e7eb;">
+      <div class="sidebar-logout">
         <div class="menu-item" onclick="logout()" style="color:#e84f3f;">
-          <span class="menu-icon">🚪</span> <span class="menu-text">Logout</span>
+          <span class="menu-icon">🚪</span>
+          <span class="menu-text">Logout</span>
         </div>
       </div>
     </aside>
 
-    <!-- MAIN -->
-    <main class="admin-content" style="flex:1;min-width:0;padding:28px 28px;box-sizing:border-box;overflow-x:hidden;">
+    <!-- MAIN CONTENT -->
+    <main class="admin-content">
 
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px;">
-        <h1 style="font-size:24px;font-weight:800;margin:0;">Dashboard</h1>
-        <span style="font-size:13px;color:#9ca3af;" id="lastUpdated"></span>
+      <!-- Page header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:10px;">
+        <h1 style="font-size:24px;font-weight:800;margin:0;color:#0d0f1a;">Dashboard</h1>
+        <span style="font-size:12px;color:#9ca3af;" id="lastUpdated"></span>
       </div>
 
-      <!-- Stats Grid -->
-      <div class="stats-grid" id="statsGrid">
-        <div class="stat-card"><div class="stat-card-icon navy">🏠</div><div class="stat-card-num" id="sTotal">—</div><div class="stat-card-label">Total Properties</div></div>
-        <div class="stat-card"><div class="stat-card-icon green">✅</div><div class="stat-card-num" id="sAvail">—</div><div class="stat-card-label">Available</div></div>
-        <div class="stat-card"><div class="stat-card-icon coral">💬</div><div class="stat-card-num" id="sInq">—</div><div class="stat-card-label">Total Inquiries</div></div>
-        <div class="stat-card"><div class="stat-card-icon gold">🆕</div><div class="stat-card-num" id="sNew">—</div><div class="stat-card-label">New Inquiries</div></div>
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-card-icon navy">🏠</div>
+          <div class="stat-card-num" id="sTotal">—</div>
+          <div class="stat-card-label">Total Properties</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon green">✅</div>
+          <div class="stat-card-num" id="sAvail">—</div>
+          <div class="stat-card-label">Available Now</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon coral">💬</div>
+          <div class="stat-card-num" id="sInq">—</div>
+          <div class="stat-card-label">Total Inquiries</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-icon gold">🆕</div>
+          <div class="stat-card-num" id="sNew">—</div>
+          <div class="stat-card-label">New Inquiries</div>
+        </div>
       </div>
 
       <!-- Charts -->
-      <div class="charts-grid" style="margin-top:24px;">
+      <div class="charts-grid">
         <div class="chart-card">
-          <h4>Inquiries by Status</h4>
+          <h4>📊 Inquiries by Status</h4>
           <canvas id="statusChart" height="220"></canvas>
         </div>
         <div class="chart-card">
-          <h4>Rooms Available per Property</h4>
+          <h4>🏠 Rooms Available</h4>
           <canvas id="roomsChart" height="220"></canvas>
         </div>
       </div>
 
       <!-- Recent Inquiries -->
-      <div class="admin-table-wrap" style="margin-top:24px;">
-        <div class="admin-table-header">
+      <div class="recent-card">
+        <div class="recent-header">
           <h3>Recent Inquiries</h3>
-          <a href="inquiries.html" style="font-size:13px;color:var(--coral);font-weight:600;">View all →</a>
+          <a href="inquiries.html" style="font-size:13px;color:var(--coral);font-weight:600;text-decoration:none;">View all →</a>
         </div>
-        <div id="recentInq" style="padding:16px;">Loading...</div>
+        <div id="recentInq" style="padding:16px 20px;color:#9ca3af;font-size:13px;">Loading...</div>
       </div>
 
     </main>
@@ -151,23 +418,24 @@
       location.href = '/admin-login.html';
     }
 
-    function showToast(msg, type='default') {
-      const c = document.getElementById('toastContainer');
-      const t = document.createElement('div');
-      t.className = `toast ${type}`;
-      t.innerHTML = `<span>${{success:'✅',error:'❌',warning:'⚠️',default:'ℹ️'}[type]||'ℹ️'}</span><span>${msg}</span>`;
-      c.appendChild(t);
-      setTimeout(() => { t.style.animation='toastOut 0.3s ease forwards'; setTimeout(()=>t.remove(),300); }, 3500);
-    }
-
-    // Set username
+    // Decode JWT for username
     try {
       const payload = JSON.parse(atob(TOKEN().split('.')[1]));
-      document.getElementById('adminUsername').textContent = payload.username || 'Admin';
-      document.getElementById('avatarInitial').textContent = (payload.username||'A')[0].toUpperCase();
+      const name = payload.username || 'Admin';
+      document.getElementById('adminUsername').textContent = name;
+      document.getElementById('avatarInitial').textContent = name[0].toUpperCase();
     } catch(e) {}
 
-    document.getElementById('lastUpdated').textContent = 'Updated ' + new Date().toLocaleTimeString();
+    document.getElementById('lastUpdated').textContent =
+      'Updated ' + new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    const STATUS_COLORS = {
+      'NEW':               { bg: '#eff6ff', color: '#2563eb' },
+      'CONTACTED':         { bg: '#fefce8', color: '#ca8a04' },
+      'VIEWING SCHEDULED': { bg: '#f5f3ff', color: '#7c3aed' },
+      'PLACED':            { bg: '#f0fdf4', color: '#16a34a' },
+      'LOST':              { bg: '#fef2f2', color: '#dc2626' },
+    };
 
     async function loadDashboard() {
       const token = TOKEN();
@@ -179,55 +447,110 @@
         const props = await propRes.json();
         const inqs  = await inqRes.json();
 
-        // Stats
-        document.getElementById('sTotal').textContent = props.length;
-        document.getElementById('sAvail').textContent = props.filter(p => Number(p.rooms_available) > 0).length;
-        document.getElementById('sInq').textContent   = inqs.length;
+        // Stats — animate count up
+        function countUp(elId, target) {
+          const el = document.getElementById(elId);
+          if (!target) { el.textContent = 0; return; }
+          let current = 0;
+          const step = Math.ceil(target / 20);
+          const interval = setInterval(() => {
+            current = Math.min(current + step, target);
+            el.textContent = current;
+            if (current >= target) clearInterval(interval);
+          }, 40);
+        }
+
+        countUp('sTotal', props.length);
+        countUp('sAvail', props.filter(p => Number(p.rooms_available) > 0).length);
+        countUp('sInq',   inqs.length);
         const newCount = inqs.filter(i => i.status === 'NEW').length;
-        document.getElementById('sNew').textContent   = newCount;
+        countUp('sNew', newCount);
+
         if (newCount > 0) {
           const badge = document.getElementById('newInqCount');
           badge.textContent = newCount;
           badge.style.display = 'inline-block';
         }
 
-        // Status chart
+        // Status doughnut chart
         const statuses = ['NEW','CONTACTED','VIEWING SCHEDULED','PLACED','LOST'];
         const counts   = statuses.map(s => inqs.filter(i => i.status === s).length);
         new Chart(document.getElementById('statusChart'), {
           type: 'doughnut',
           data: {
             labels: statuses,
-            datasets: [{ data: counts, backgroundColor: ['#3b82f6','#f5a623','#8b5cf6','#22c55e','#e84f3f'], borderWidth: 0 }]
+            datasets: [{
+              data: counts,
+              backgroundColor: ['#3b82f6','#f5a623','#8b5cf6','#22c55e','#e84f3f'],
+              borderWidth: 0,
+              hoverOffset: 6
+            }]
           },
-          options: { plugins: { legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 12 }, padding: 14 } } }, cutout: '65%' }
+          options: {
+            cutout: '68%',
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: { font: { family: 'Plus Jakarta Sans', size: 11 }, padding: 12, boxWidth: 10 }
+              }
+            }
+          }
         });
 
-        // Rooms chart
-        const top8   = props.filter(p => p.rooms_available).slice(0, 8);
-        new Chart(document.getElementById('roomsChart'), {
-          type: 'bar',
-          data: {
-            labels: top8.map(p => p.title?.length > 14 ? p.title.slice(0,14)+'…' : p.title),
-            datasets: [{ label: 'Rooms', data: top8.map(p => p.rooms_available), backgroundColor: '#e84f3f', borderRadius: 6 }]
-          },
-          options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { font: { family: 'Plus Jakarta Sans' } } }, x: { ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } } } } }
-        });
+        // Rooms bar chart
+        const top8 = props.filter(p => Number(p.rooms_available) > 0).slice(0, 8);
+        if (top8.length) {
+          new Chart(document.getElementById('roomsChart'), {
+            type: 'bar',
+            data: {
+              labels: top8.map(p => p.title?.length > 14 ? p.title.slice(0,14) + '…' : (p.title || '?')),
+              datasets: [{
+                label: 'Rooms',
+                data: top8.map(p => p.rooms_available),
+                backgroundColor: '#e84f3f',
+                borderRadius: 6,
+                borderSkipped: false
+              }]
+            },
+            options: {
+              plugins: { legend: { display: false } },
+              scales: {
+                y: { beginAtZero: true, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } }, grid: { color: '#f3f4f6' } },
+                x: { ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }, grid: { display: false } }
+              }
+            }
+          });
+        } else {
+          document.getElementById('roomsChart').closest('.chart-card').innerHTML =
+            '<h4>🏠 Rooms Available</h4><p style="color:#9ca3af;font-size:13px;text-align:center;padding:40px 0;">No available properties yet</p>';
+        }
 
         // Recent inquiries
-        const recent = inqs.slice(0, 5);
-        document.getElementById('recentInq').innerHTML = recent.length ? recent.map(i => `
-          <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f3f4f6;flex-wrap:wrap;gap:6px;">
+        const recent = inqs.slice(0, 6);
+        const recentEl = document.getElementById('recentInq');
+        if (!recent.length) {
+          recentEl.innerHTML = '<p style="text-align:center;padding:20px 0;color:#9ca3af;">No inquiries yet</p>';
+          return;
+        }
+
+        recentEl.innerHTML = '';
+        recent.forEach(i => {
+          const sc = STATUS_COLORS[i.status] || STATUS_COLORS['NEW'];
+          const row = document.createElement('div');
+          row.className = 'recent-row';
+          row.innerHTML = `
             <div>
-              <strong style="font-size:14px;">${i.name||''}</strong>
-              <span style="font-size:12px;color:#9ca3af;margin-left:8px;">${i.house||'N/A'}</span>
+              <strong style="font-size:14px;color:#0d0f1a;">${i.name || '—'}</strong>
+              <span style="font-size:12px;color:#9ca3af;margin-left:8px;">${i.house || 'N/A'}</span>
             </div>
-            <span class="status-badge ${(i.status||'new').toLowerCase().replace(' ','-')}">${i.status||'NEW'}</span>
-          </div>`).join('') : '<p style="color:#9ca3af;text-align:center;padding:20px 0;">No inquiries yet</p>';
+            <span class="status-pill" style="background:${sc.bg};color:${sc.color};">${i.status || 'NEW'}</span>`;
+          recentEl.appendChild(row);
+        });
 
       } catch(err) {
         console.error(err);
-        showToast('Failed to load dashboard data', 'error');
+        document.getElementById('recentInq').innerHTML =
+          '<p style="color:#e84f3f;text-align:center;">Failed to load data</p>';
       }
     }
 
