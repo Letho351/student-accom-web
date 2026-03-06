@@ -220,14 +220,13 @@ app.post('/properties', authMiddleware, upload.array('images', 10), async (req, 
 
   const [dup] = await db.query(
     `SELECT id FROM properties 
-     WHERE LOWER(title)=LOWER(?) 
-       AND LOWER(location)=LOWER(?) 
-       AND rooms_available=?`,
-    [title?.trim(), location?.trim(), rooms_available]
+     WHERE LOWER(TRIM(title))=LOWER(TRIM(?)) 
+       AND LOWER(TRIM(location))=LOWER(TRIM(?))`,
+    [title?.trim(), location?.trim()]
   );
 
   if (dup.length) {
-    return res.status(409).json({ message: 'Property already exists' });
+    return res.status(409).json({ message: 'A property with this title and location already exists.' });
   }
 
   let imageUrls = [];
