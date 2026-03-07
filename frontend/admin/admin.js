@@ -53,7 +53,16 @@ function showConfirm(message, onConfirm) {
 // ============================================================
 //  LOGOUT
 // ============================================================
-function logout() {
+async function logout() {
+  try {
+    const token = TOKEN();
+    if (token) {
+      await fetch('/admin/logout', {
+        method: 'POST',
+        headers: { Authorization: 'Bearer ' + token }
+      });
+    }
+  } catch(e) {}
   localStorage.removeItem('admin_token');
   location.href = '/admin-login.html';
 }

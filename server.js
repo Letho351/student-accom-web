@@ -20,13 +20,96 @@ if (!process.env.JWT_SECRET) {
 // ── Ensure tmp dir exists ──────────────────────────────────
 if (!fs.existsSync("tmp")) fs.mkdirSync("tmp");
 
-const upload    = require("./upload");
+const upload     = require("./upload");
 const cloudinary = require("./cloudinary");
-const express   = require("express");
-const cors      = require("cors");
-const mysql     = require("mysql2");
-const bcrypt    = require("bcryptjs");
-const jwt       = require("jsonwebtoken");
+const express    = require("express");
+const cors       = require("cors");
+const mysql      = require("mysql2");
+const bcrypt     = require("bcryptjs");
+const jwt        = require("jsonwebtoken");
+const rateLimit  = require("express-rate-limit");
+
+// ══════════════════════════════════════════════════════════
+//  SECURITY — RATE LIMITERS
+// ══════════════════════════════════════════════════════════
+
+// Track login failures per IP for progressive blocking
+const loginFailures = new Map(); // ip -> { count, blockedUntil }
+
+function getLoginBlock(ip) {
+  const record = loginFailures.get(ip) || { count: 0, blockedUntil: null };
+  if (record.blockedUntil && Date.now() < record.blockedUntil) {
+    const minutesLeft = Math.ceil((record.blockedUntil - Date.now()) / 60000);
+    return { blocked: true, minutesLeft };
+  }
+  return { blocked: false, count: record.count };
+}
+
+function recordLoginFailure(ip) {
+  const record = loginFailures.get(ip) || { count: 0, blockedUntil: null };
+  // Reset count if previous block has expired
+  if (record.blockedUntil && Date.now() >= record.blockedUntil) {
+    record.count = 0;
+    record.blockedUntil = null;
+  }
+  record.count += 1;
+
+  // Progressive blocking: 3 fails = 1hr, 6 fails = 2hr, 9 fails = 24hr
+  if (record.count >= 9) {
+    record.blockedUntil = Date.now() + 24 * 60 * 60 * 1000;
+    console.warn(`🚫 Login blocked 24hr for IP: ${ip}`);
+  } else if (record.count >= 6) {
+    record.blockedUntil = Date.now() + 2 * 60 * 60 * 1000;
+    console.warn(`🚫 Login blocked 2hr for IP: ${ip}`);
+  } else if (record.count >= 3) {
+    record.blockedUntil = Date.now() + 60 * 60 * 1000;
+    console.warn(`🚫 Login blocked 1hr for IP: ${ip}`);
+  }
+  loginFailures.set(ip, record);
+}
+
+function recordLoginSuccess(ip) {
+  loginFailures.delete(ip); // Clear on successful login
+}
+
+// Inquiry rate limit — max 10 per IP per 24 hours
+const inquiryLimiter = rateLimit({
+  windowMs: 24 * 60 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: "Too many inquiries submitted. Please try again tomorrow." }
+});
+
+// ══════════════════════════════════════════════════════════
+//  SECURITY — XSS SANITIZER
+// ══════════════════════════════════════════════════════════
+function sanitize(val) {
+  if (!val) return val;
+  return String(val)
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;")
+    .replace(/\//g, "&#x2F;")
+    .trim();
+}
+
+// ══════════════════════════════════════════════════════════
+//  SECURITY — TOKEN BLACKLIST (logout invalidation)
+// ══════════════════════════════════════════════════════════
+const tokenBlacklist = new Set();
+
+// Clean expired tokens every hour so Set doesn't grow forever
+setInterval(() => {
+  const now = Date.now() / 1000;
+  for (const token of tokenBlacklist) {
+    try {
+      const decoded = jwt.decode(token);
+      if (!decoded || decoded.exp < now) tokenBlacklist.delete(token);
+    } catch { tokenBlacklist.delete(token); }
+  }
+}, 60 * 60 * 1000);
 
 const app = express();
 app.use(cors());
@@ -47,9 +130,28 @@ const db = mysql.createPool({
   ssl: { rejectUnauthorized: false }
 }).promise();
 
-db.getConnection()
-  .then(conn => { console.log("✅ Database connected"); conn.release(); })
-  .catch(err  => console.error("❌ DB connection error:", err.message));
+// ── DB connection check + auto-reconnect ──────────────────
+async function checkDbConnection() {
+  try {
+    const conn = await db.getConnection();
+    console.log("✅ Database connected");
+    conn.release();
+  } catch (err) {
+    console.error("❌ DB connection error:", err.message);
+    // Retry after 5 seconds
+    setTimeout(checkDbConnection, 5000);
+  }
+}
+checkDbConnection();
+
+// Keep DB alive — ping every 4 minutes to prevent connection timeout
+setInterval(async () => {
+  try {
+    await db.query("SELECT 1");
+  } catch (err) {
+    console.error("❌ DB keepalive failed:", err.message);
+  }
+}, 4 * 60 * 1000);
 
 // ── JWT ────────────────────────────────────────────────────
 const JWT_SECRET = process.env.JWT_SECRET;
@@ -57,8 +159,14 @@ const JWT_SECRET = process.env.JWT_SECRET;
 function authMiddleware(req, res, next) {
   const hdr = req.headers.authorization;
   if (!hdr) return res.status(401).json({ error: "Missing token" });
+  const token = hdr.split(" ")[1];
+  // Check blacklist first
+  if (tokenBlacklist.has(token)) {
+    return res.status(401).json({ error: "Token has been invalidated. Please log in again." });
+  }
   try {
-    req.admin = jwt.verify(hdr.split(" ")[1], JWT_SECRET);
+    req.admin = jwt.verify(token, JWT_SECRET);
+    req.token = token; // store for logout
     next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
@@ -82,9 +190,14 @@ function cleanTmpFiles(files) {
 //  PUBLIC ROUTES
 // ══════════════════════════════════════════════════════════
 
-app.get("/", (req, res) =>
-  res.sendFile(path.join(__dirname, "frontend", "index.html"))
-);
+app.get("/", (req, res) => {
+  try {
+    res.sendFile(path.join(__dirname, "frontend", "index.html"));
+  } catch (err) {
+    console.error("GET / ERROR:", err.message);
+    res.status(500).send("Site is temporarily unavailable");
+  }
+});
 
 // GET all properties
 app.get("/properties", async (req, res) => {
@@ -115,9 +228,18 @@ app.get("/properties/:id", async (req, res) => {
 //  INQUIRIES
 // ══════════════════════════════════════════════════════════
 
-app.post("/inquiries", async (req, res) => {
+app.post("/inquiries", inquiryLimiter, async (req, res) => {
   try {
-    const { name, email, phone, preferred_contact, message, propertyId, property_name } = req.body;
+    const raw = req.body;
+
+    // XSS sanitize all text inputs
+    const name              = sanitize(raw.name);
+    const email             = sanitize(raw.email);
+    const phone             = sanitize(raw.phone);
+    const preferred_contact = sanitize(raw.preferred_contact);
+    const message           = sanitize(raw.message);
+    const property_name     = sanitize(raw.property_name);
+    const propertyId        = raw.propertyId;
 
     if (!name) return res.status(400).json({ message: "Name is required" });
 
@@ -200,17 +322,36 @@ app.delete("/admin/inquiries/:id", authMiddleware, async (req, res) => {
 
 app.post("/admin/login", async (req, res) => {
   try {
+    const ip = req.ip || req.headers["x-forwarded-for"] || "unknown";
     const { username, password } = req.body;
+
     if (!username || !password)
       return res.status(400).json({ error: "Username and password required" });
+
+    // Progressive block check
+    const block = getLoginBlock(ip);
+    if (block.blocked) {
+      return res.status(429).json({
+        error: `Too many failed attempts. Try again in ${block.minutesLeft} minute${block.minutesLeft === 1 ? "" : "s"}.`
+      });
+    }
 
     const [rows] = await db.query(
       "SELECT * FROM admin_users WHERE username = ?", [username]
     );
-    if (!rows.length) return res.status(401).json({ error: "Invalid credentials" });
+    if (!rows.length) {
+      recordLoginFailure(ip);
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
 
     const valid = await bcrypt.compare(password, rows[0].password);
-    if (!valid) return res.status(401).json({ error: "Invalid credentials" });
+    if (!valid) {
+      recordLoginFailure(ip);
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+
+    // Success — clear failure record
+    recordLoginSuccess(ip);
 
     const token = jwt.sign(
       { id: rows[0].id, username: rows[0].username },
@@ -222,6 +363,17 @@ app.post("/admin/login", async (req, res) => {
   } catch (err) {
     console.error("POST /admin/login ERROR:", err.message);
     res.status(500).json({ error: "Login failed. Please try again." });
+  }
+});
+
+// LOGOUT — blacklist the token immediately
+app.post("/admin/logout", authMiddleware, (req, res) => {
+  try {
+    tokenBlacklist.add(req.token);
+    console.log("✅ Token blacklisted on logout");
+    res.json({ message: "Logged out successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Logout failed" });
   }
 });
 
@@ -445,6 +597,18 @@ app.delete("/properties/:id", authMiddleware, async (req, res) => {
 //  GLOBAL ERROR HANDLER — catches anything that slips through
 // ══════════════════════════════════════════════════════════
 app.use((err, req, res, next) => {
+  // Multer file size error
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(400).json({ message: "Image too large. Maximum size is 5MB per image." });
+  }
+  // Multer file type error
+  if (err.message === "Only image files are allowed") {
+    return res.status(400).json({ message: "Only image files are allowed." });
+  }
+  // Multer too many files
+  if (err.code === "LIMIT_FILE_COUNT") {
+    return res.status(400).json({ message: "Maximum 10 images allowed." });
+  }
   console.error("🔥 UNHANDLED ERROR:", err.message);
   res.status(500).json({ message: "An unexpected error occurred" });
 });
