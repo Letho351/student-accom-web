@@ -533,7 +533,7 @@
           </div>
 
           <!-- Submit -->
-          <button class="submit-btn" id="submitBtn" onclick="submitInquiry()">
+          <button class="submit-btn" id="submitBtn">
             <span class="submit-text">✉️ Send Inquiry</span>
             <span class="submit-spinner"></span>
           </button>
@@ -698,6 +698,15 @@
 
     loadProperties();
 
+    // ---- Single submit listener with double-tap guard ----
+    let submitting = false;
+    document.getElementById('submitBtn').addEventListener('click', async () => {
+      if (submitting) return;
+      submitting = true;
+      await submitInquiry();
+      submitting = false;
+    });
+
     // ---- Validation helpers ----
     function showErr(fieldId, errId) {
       document.getElementById(fieldId).classList.add('error');
@@ -809,7 +818,7 @@
       } catch (err) {
         console.error(err);
         btn.classList.remove('loading');
-        alert('Server error. Please try again or contact us on WhatsApp.');
+        showDuplicateError('Server error. Please try again or contact us on WhatsApp.');
       }
     }
 

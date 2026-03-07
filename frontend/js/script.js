@@ -387,17 +387,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // About section inquiry count (fetch separately)
-  fetchInquiryCount();
-
   // Load properties
   loadProperties();
 });
-
-// Fetch inquiry count for about section
-async function fetchInquiryCount() {
-  try {
-    const res = await fetch('/properties');
-    if (!res.ok) return;
-  } catch { /* silent */ }
-}

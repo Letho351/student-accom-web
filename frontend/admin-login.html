@@ -49,7 +49,7 @@
       <button class="forgot-link" type="button" onclick="forgotPassword()">Forgot password?</button>
     </div>
 
-    <button class="login-btn" id="loginBtn" onclick="login()">
+    <button class="login-btn" id="loginBtn">
       <span class="btn-text">Sign In Securely</span>
       <span class="login-spinner"></span>
     </button>
@@ -118,9 +118,10 @@
       }
     });
 
-    // ---- Enter key login ----
+    // ---- Single event listeners — no double firing ----
+    document.getElementById('loginBtn').addEventListener('click', login);
     document.addEventListener('keydown', e => {
-      if (e.key === 'Enter') login();
+      if (e.key === 'Enter' && !document.getElementById('loginBtn').classList.contains('loading')) login();
     });
 
     // ---- Login ----
