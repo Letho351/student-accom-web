@@ -64,38 +64,6 @@
     }
     .mode-btn--inactive:hover { background: #f1f5f9; }
 
-    /* ── Suggestions dropdown ── */
-    .search-suggestions {
-      position: fixed;
-      background: #fff;
-      border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-      z-index: 999999;
-      overflow: hidden;
-      display: none;
-      border: 1px solid #e2e8f0;
-      width: 100%;
-      max-width: 668px;
-    }
-    .search-suggestions.open { display: block; }
-    .suggestion-item {
-      padding: 13px 16px;
-      font-size: 14px;
-      font-weight: 500;
-      color: #1e293b;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      border-bottom: 1px solid #f1f5f9;
-      transition: background 100ms;
-    }
-    .suggestion-item:last-child { border-bottom: none; }
-    .suggestion-item:hover { background: #fff5f4; color: var(--coral); }
-    .suggestion-label { flex: 1; }
-    .suggestion-count { font-size: 12px; color: #94a3b8; }
-    .suggestions-empty { padding: 14px 16px; font-size: 13px; color: #94a3b8; text-align: center; }
-
     /* Filter toggle button — mobile only */
     .filter-toggle-btn {
       display: none;
@@ -395,7 +363,6 @@
             <input id="searchInput" placeholder="Search by location..." autocomplete="off" spellcheck="false" />
 <button class="btn btn--primary" id="searchBtn">Search</button>
             <!-- Suggestions -->
-            <div class="search-suggestions" id="searchSuggestions"></div>
           </div>
         </div>
 

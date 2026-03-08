@@ -334,100 +334,40 @@ function setSearchMode(mode) {
     input.placeholder = mode === 'location' ? 'Search by location...' : 'Search by house name...';
     input.value = '';
   }
-  hideSuggestions();
   applyFiltersAndRender();
 }
 
 // ============================================================
-// CLEAR SEARCH
+// CLEAR FILTERS
 // ============================================================
-function clearSearch() {
-  const input = document.getElementById('searchInput');
-  if (input) input.value = '';
-  const clearBtn = document.getElementById('searchClearBtn');
-  if (clearBtn) clearBtn.style.display = 'none';
-  hideSuggestions();
+function clearAllFilters() {
+  const si = searchInput();
+  if (si) si.value = '';
+
+  document.querySelectorAll('.filter-sidebar input[type="checkbox"]')
+    .forEach(cb => cb.checked = false);
+
+  const pr = priceRange();
+  if (pr) {
+    pr.value = pr.max;
+    pr.style.setProperty('--val', '100%');
+    const maxEl = document.getElementById('priceMax');
+    if (maxEl) maxEl.textContent = Number(pr.max).toLocaleString();
+  }
+
+  const ss = sortSelect();
+  if (ss) ss.value = 'newest';
+
   applyFiltersAndRender();
 }
 
 // ============================================================
-// SUGGESTIONS
+// HELPERS
 // ============================================================
-
-function showSuggestions(query) {
-
-  const box = document.getElementById('searchSuggestions');
-  if (!box) return;
-
-  const q = query.toLowerCase();
-  let matches = [];
-
-  if (SEARCH_MODE === 'location') {
-    const seen = new Set();
-    ALL_PROPS.forEach(p => {
-      if (!p.location) return;
-      const loc = p.location.trim();
-      if (loc.toLowerCase().includes(q) && !seen.has(loc.toLowerCase())) {
-        seen.add(loc.toLowerCase());
-        const count = ALL_PROPS.filter(x => x.location?.trim().toLowerCase() === loc.toLowerCase()).length;
-        matches.push({ label: loc, count });
-      }
-    });
-  } else {
-    ALL_PROPS.forEach(p => {
-      if (!p.title) return;
-      if (p.title.toLowerCase().includes(q)) {
-        matches.push({ label: p.title });
-      }
-    });
-  }
-
-  matches = matches.slice(0, 6);
-
-  // Position under input
-  const input = document.getElementById('searchInput');
-  if (input) {
-    const rect = input.getBoundingClientRect();
-    box.style.position = 'fixed';
-    box.style.top   = (rect.bottom + 6) + 'px';
-    box.style.left  = rect.left + 'px';
-    box.style.width = rect.width + 'px';
-  }
-
-  if (!matches.length) {
-    box.innerHTML = '<div class="suggestions-empty">No matches found</div>';
-  } else {
-    box.innerHTML = matches.map((m, i) => `
-      <div class="suggestion-item" data-idx="${i}">
-        <span class="suggestion-label">${escapeHtml(m.label)}</span>
-        ${m.count ? `<span class="suggestion-count">${m.count} listing${m.count > 1 ? 's' : ''}</span>` : ''}
-      </div>
-    `).join('');
-
-    box.querySelectorAll('.suggestion-item').forEach((el, i) => {
-      const label = matches[i].label;
-      el.addEventListener('mousedown', () => selectSuggestion(label));
-      el.addEventListener('touchend',  (e) => { e.preventDefault(); selectSuggestion(label); });
-    });
-  }
-
-  box.style.display = 'block';
-  box.classList.add('open');
-}
-
-function hideSuggestions() {
-  const box = document.getElementById('searchSuggestions');
-  if (box) {
-    box.style.display = 'none';
-    box.classList.remove('open');
-  }
-}
-
-function selectSuggestion(value) {
-  const input = document.getElementById('searchInput');
-  if (input) input.value = value;
-  hideSuggestions();
-  applyFiltersAndRender();
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(str));
+  return div.innerHTML;
 }
 
 // ============================================================
@@ -437,34 +377,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Search button
   document.getElementById('searchBtn')?.addEventListener('click', () => {
-    hideSuggestions();
-    applyFiltersAndRender();
+      applyFiltersAndRender();
   });
 
   // Search on Enter key
   document.getElementById('searchInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') { hideSuggestions(); applyFiltersAndRender(); }
+    if (e.key === 'Enter') { applyFiltersAndRender(); }
   });
 
-  // Search input — show/hide clear btn + suggestions as user types
+  // Search input — filter as you type
   document.getElementById('searchInput')?.addEventListener('input', function() {
-    const val = this.value.trim();
-
-    // Show suggestions
-    if (val.length >= 1) {
-      showSuggestions(val);
-    } else {
-      hideSuggestions();
-      applyFiltersAndRender();
-    }
-  });
-
-  // Hide suggestions when clicking outside
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.search-wrap') && !e.target.closest('.search-suggestions')) hideSuggestions();
-  });
-  document.getElementById('searchInput')?.addEventListener('blur', () => {
-    setTimeout(hideSuggestions, 150);
+    applyFiltersAndRender();
   });
 
   // Sort change
