@@ -40,59 +40,57 @@
       justify-content: center;
     }
     .mode-btn {
-      padding: 8px 20px;
+      padding: 9px 24px;
       border-radius: var(--radius-pill);
-      border: 2px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.08);
-      color: rgba(255,255,255,0.6);
+      border: 2px solid rgba(255,255,255,0.9);
+      background: transparent;
+      color: #fff;
       font-size: 13px;
       font-weight: 700;
       font-family: 'Plus Jakarta Sans', sans-serif;
       cursor: pointer;
       transition: all 200ms ease;
+      letter-spacing: 0.2px;
     }
     .mode-btn:hover {
-      border-color: rgba(255,255,255,0.4);
-      color: rgba(255,255,255,0.9);
+      background: rgba(255,255,255,0.15);
     }
     .mode-btn.active {
       background: var(--coral);
       border-color: var(--coral);
       color: #fff;
-      box-shadow: 0 4px 14px rgba(232,79,63,0.35);
+      box-shadow: 0 4px 14px rgba(232,79,63,0.4);
     }
     .search-clear-btn {
-      position: absolute;
-      right: 110px;
-      top: 50%;
-      transform: translateY(-50%);
-      background: rgba(255,255,255,0.15);
+      padding: 0 18px;
+      height: 100%;
+      background: rgba(255,255,255,0.18);
       border: none;
-      color: rgba(255,255,255,0.7);
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      font-size: 11px;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
       cursor: pointer;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
       transition: all 150ms ease;
-      font-family: inherit;
+      border-left: 1px solid rgba(255,255,255,0.15);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .search-clear-btn:hover {
-      background: rgba(255,255,255,0.25);
-      color: #fff;
+      background: rgba(255,255,255,0.28);
     }
     .search-suggestions {
       position: absolute;
-      top: calc(100% + 6px);
+      top: calc(100% + 8px);
       left: 0;
       right: 0;
       background: #fff;
       border-radius: var(--radius-md);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
-      z-index: 999;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.22);
+      z-index: 99999;
       overflow: hidden;
       display: none;
       border: 1px solid var(--border);
@@ -408,10 +406,10 @@
           <!-- Mode toggle -->
           <div class="search-mode-toggle">
             <button class="mode-btn active" id="modeLocation" onclick="setSearchMode('location')">
-              📍 Location
+              Location
             </button>
             <button class="mode-btn" id="modeName" onclick="setSearchMode('name')">
-              🏠 House Name
+              House Name
             </button>
           </div>
 
@@ -423,7 +421,7 @@
               autocomplete="off"
               spellcheck="false"
             />
-            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" style="display:none;" title="Clear search">✕</button>
+            <button class="search-clear-btn" id="searchClearBtn" onclick="clearSearch()" >✕ Clear</button>
             <button class="btn btn--primary" id="searchBtn">Search</button>
 
             <!-- Suggestions dropdown -->
