@@ -322,17 +322,18 @@ function renderList(list) {
 function setSearchMode(mode) {
   SEARCH_MODE = mode;
   // Update button states
-  document.getElementById('modeLocation').classList.toggle('active', mode === 'location');
-  document.getElementById('modeName').classList.toggle('active', mode === 'name');
+  const locBtn  = document.getElementById('modeLocation');
+  const nameBtn = document.getElementById('modeName');
+  if (locBtn && nameBtn) {
+    locBtn.className  = 'mode-btn ' + (mode === 'location' ? 'mode-btn--active' : 'mode-btn--inactive');
+    nameBtn.className = 'mode-btn ' + (mode === 'name'     ? 'mode-btn--active' : 'mode-btn--inactive');
+  }
   // Update placeholder
   const input = document.getElementById('searchInput');
   if (input) {
     input.placeholder = mode === 'location' ? 'Search by location...' : 'Search by house name...';
     input.value = '';
   }
-  // Hide clear btn
-  const clearBtn = document.getElementById('searchClearBtn');
-  if (clearBtn) clearBtn.style.display = 'none';
   hideSuggestions();
   applyFiltersAndRender();
 }
@@ -389,7 +390,6 @@ function showSuggestions(query) {
   } else {
     box.innerHTML = matches.map(m => `
       <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(m.label)}')">
-        <span class="suggestion-icon">${m.icon}</span>
         <span class="suggestion-label">${escapeHtml(m.label)}</span>
         ${m.count ? `<span class="suggestion-count">${m.count} listing${m.count > 1 ? 's' : ''}</span>` : ''}
       </div>
@@ -407,8 +407,7 @@ function hideSuggestions() {
 function selectSuggestion(value) {
   const input = document.getElementById('searchInput');
   if (input) input.value = value;
-  const clearBtn = document.getElementById('searchClearBtn');
-  if (clearBtn) clearBtn.style.display = 'flex';
+
   hideSuggestions();
   applyFiltersAndRender();
 }
@@ -420,9 +419,6 @@ function clearAllFilters() {
   // Reset search
   const si = searchInput();
   if (si) si.value = '';
-  // Reset clear button
-  const clearBtn = document.getElementById('searchClearBtn');
-  if (clearBtn) clearBtn.style.display = 'none';
   hideSuggestions();
 
   // Reset checkboxes
@@ -473,9 +469,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Search input — show/hide clear btn + suggestions as user types
   document.getElementById('searchInput')?.addEventListener('input', function() {
     const val = this.value.trim();
-    // Show/hide clear button
-    const clearBtn = document.getElementById('searchClearBtn');
-    if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+
     // Show suggestions
     if (val.length >= 1) {
       showSuggestions(val);
