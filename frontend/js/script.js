@@ -385,26 +385,35 @@ function showSuggestions(query) {
   // Max 6 suggestions
   matches = matches.slice(0, 6);
 
+  // Position under input first
+  const input = document.getElementById('searchInput');
+  if (input) {
+    const rect = input.getBoundingClientRect();
+    box.style.top    = (rect.bottom + 6) + 'px';
+    box.style.left   = rect.left + 'px';
+    box.style.width  = rect.width + 'px';
+  }
+
   if (!matches.length) {
     box.innerHTML = '<div class="suggestions-empty">No matches found</div>';
   } else {
-    box.innerHTML = matches.map(m => `
-      <div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion('${escapeHtml(m.label)}')" ontouchend="event.preventDefault(); selectSuggestion('${escapeHtml(m.label)}')">
+    // Build items using data attribute — safe against quotes/apostrophes
+    box.innerHTML = matches.map((m, i) => `
+      <div class="suggestion-item" data-idx="${i}">
         <span class="suggestion-label">${escapeHtml(m.label)}</span>
         ${m.count ? `<span class="suggestion-count">${m.count} listing${m.count > 1 ? 's' : ''}</span>` : ''}
       </div>
     `).join('');
+
+    // Attach events using JS — no inline handlers
+    box.querySelectorAll('.suggestion-item').forEach((el, i) => {
+      const label = matches[i].label;
+      const pick = (e) => { e.preventDefault(); selectSuggestion(label); };
+      el.addEventListener('mousedown', pick);
+      el.addEventListener('touchend', pick);
+    });
   }
 
-  // Position fixed dropdown under the input
-  const input = document.getElementById('searchInput');
-  if (input) {
-    const rect = input.getBoundingClientRect();
-    box.style.top  = (rect.bottom + 8) + 'px';
-    box.style.left = rect.left + 'px';
-    box.style.width = rect.width + 'px';
-    box.style.maxWidth = rect.width + 'px';
-  }
   box.classList.add('open');
 }
 
