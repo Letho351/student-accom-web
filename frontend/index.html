@@ -62,62 +62,28 @@
       border-color: #fff;
       color: #1e293b;
     }
-    .mode-btn--inactive:hover {
-      background: #f1f5f9;
-    }
+    .mode-btn--inactive:hover { background: #f1f5f9; }
 
-    /* ── Search input wrapper ── */
-    .search-input-wrap {
-      position: relative;
-      width: 100%;
-      margin-bottom: 10px;
-    }
-    .search-input-wrap input {
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    /* ── Buttons row ── */
-    .search-btns-row {
-      display: flex;
-      gap: 10px;
-      width: 100%;
-    }
-    .search-action-btn {
-      flex: 1;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      font-size: 15px;
+    /* ── Clear button inside search-wrap ── */
+    .search-clear-btn {
+      flex-shrink: 0;
+      background: #fff;
+      color: #1e293b;
+      border: 1.5px solid #e2e8f0;
       font-weight: 700;
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      cursor: pointer;
-      border: none;
-      transition: all 180ms ease;
+      white-space: nowrap;
     }
-    .search-action-btn--primary {
-      background: var(--coral);
-      color: #fff;
-      box-shadow: 0 4px 14px rgba(232,79,63,0.35);
-    }
-    .search-action-btn--primary:hover { background: #d94f3a; }
-    .search-action-btn--clear {
-      background: rgba(255,255,255,0.18);
-      color: #fff;
-      border: 2px solid rgba(255,255,255,0.5);
-      flex: 0 0 auto;
-      padding: 14px 22px;
-    }
-    .search-action-btn--clear:hover { background: rgba(255,255,255,0.28); }
+    .search-clear-btn:hover { background: #f1f5f9; }
 
     /* ── Suggestions dropdown ── */
     .search-suggestions {
       position: absolute;
-      top: calc(100% + 6px);
+      top: calc(100% + 8px);
       left: 0;
       right: 0;
       background: #fff;
       border-radius: 12px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       z-index: 999999;
       overflow: hidden;
       display: none;
@@ -436,16 +402,13 @@
             <button class="mode-btn mode-btn--inactive" id="modeName" onclick="setSearchMode('name')">Accomo Name</button>
           </div>
 
-          <!-- Input + suggestions wrapper -->
-          <div class="search-input-wrap">
+          <!-- Search wrap — original structure preserved -->
+          <div class="search-wrap" style="position:relative;">
             <input id="searchInput" placeholder="Search by location..." autocomplete="off" spellcheck="false" />
+            <button class="btn btn--ghost search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕ Clear</button>
+            <button class="btn btn--primary" id="searchBtn">Search</button>
+            <!-- Suggestions -->
             <div class="search-suggestions" id="searchSuggestions"></div>
-          </div>
-
-          <!-- Buttons row -->
-          <div class="search-btns-row">
-            <button class="search-action-btn search-action-btn--primary" id="searchBtn">Search</button>
-            <button class="search-action-btn search-action-btn--clear" id="searchClearBtn" onclick="clearSearch()">✕ Clear</button>
           </div>
         </div>
 
