@@ -338,6 +338,15 @@ function setSearchMode(mode) {
 }
 
 // ============================================================
+// CLEAR SEARCH
+// ============================================================
+function clearSearch() {
+  const input = document.getElementById('searchInput');
+  if (input) input.value = '';
+  applyFiltersAndRender();
+}
+
+// ============================================================
 // CLEAR FILTERS
 // ============================================================
 function clearAllFilters() {
