@@ -389,7 +389,7 @@ function showSuggestions(query) {
     box.innerHTML = '<div class="suggestions-empty">No matches found</div>';
   } else {
     box.innerHTML = matches.map(m => `
-      <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(m.label)}')">
+      <div class="suggestion-item" onmousedown="event.preventDefault(); selectSuggestion('${escapeHtml(m.label)}')" ontouchend="event.preventDefault(); selectSuggestion('${escapeHtml(m.label)}')">
         <span class="suggestion-label">${escapeHtml(m.label)}</span>
         ${m.count ? `<span class="suggestion-count">${m.count} listing${m.count > 1 ? 's' : ''}</span>` : ''}
       </div>
@@ -490,7 +490,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Hide suggestions when clicking outside
   document.addEventListener('click', e => {
-    if (!e.target.closest('.search-wrap')) hideSuggestions();
+    if (!e.target.closest('.search-wrap') && !e.target.closest('.search-suggestions')) hideSuggestions();
+  });
+  document.getElementById('searchInput')?.addEventListener('blur', () => {
+    setTimeout(hideSuggestions, 150);
   });
 
   // Sort change
