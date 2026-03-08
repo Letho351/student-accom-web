@@ -6,8 +6,9 @@
 'use strict';
 
 // ---- State ----
-let ALL_PROPS  = [];
-let FILTERED   = [];
+let ALL_PROPS    = [];
+let FILTERED     = [];
+let SEARCH_MODE  = 'location'; // 'location' or 'name'
 
 // ---- DOM refs ----
 const listEl       = () => document.getElementById('property-list');
@@ -138,7 +139,7 @@ function animateCount(id, target) {
 function getFilters() {
   const maxPrice = Number(priceRange()?.value || 99999);
   const search   = searchInput()?.value.trim().toLowerCase() || '';
-  const mode     = searchMode()?.value || 'location';
+  const mode     = SEARCH_MODE;
   const sort     = sortSelect()?.value || 'newest';
 
   const roomTypes   = [...document.querySelectorAll('input[name="roomType"]:checked')].map(x => x.value);
@@ -316,12 +317,113 @@ function renderList(list) {
 }
 
 // ============================================================
+// SEARCH MODE TOGGLE
+// ============================================================
+function setSearchMode(mode) {
+  SEARCH_MODE = mode;
+  // Update button states
+  document.getElementById('modeLocation').classList.toggle('active', mode === 'location');
+  document.getElementById('modeName').classList.toggle('active', mode === 'name');
+  // Update placeholder
+  const input = document.getElementById('searchInput');
+  if (input) {
+    input.placeholder = mode === 'location' ? 'Search by location...' : 'Search by house name...';
+    input.value = '';
+  }
+  // Hide clear btn
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  hideSuggestions();
+  applyFiltersAndRender();
+}
+
+// ============================================================
+// CLEAR SEARCH
+// ============================================================
+function clearSearch() {
+  const input = document.getElementById('searchInput');
+  if (input) input.value = '';
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  hideSuggestions();
+  applyFiltersAndRender();
+}
+
+// ============================================================
+// SUGGESTIONS
+// ============================================================
+function showSuggestions(query) {
+  const box = document.getElementById('searchSuggestions');
+  if (!box || !ALL_PROPS.length) return;
+
+  const q = query.toLowerCase();
+  let matches = [];
+
+  if (SEARCH_MODE === 'location') {
+    // Unique locations that match
+    const seen = new Set();
+    ALL_PROPS.forEach(p => {
+      if (!p.location) return;
+      const loc = p.location.trim();
+      if (loc.toLowerCase().includes(q) && !seen.has(loc.toLowerCase())) {
+        seen.add(loc.toLowerCase());
+        const count = ALL_PROPS.filter(x => x.location?.trim().toLowerCase() === loc.toLowerCase()).length;
+        matches.push({ label: loc, icon: '📍', count });
+      }
+    });
+  } else {
+    // Property names
+    ALL_PROPS.forEach(p => {
+      if (!p.title) return;
+      if (p.title.toLowerCase().includes(q)) {
+        matches.push({ label: p.title, icon: '🏠', count: null });
+      }
+    });
+  }
+
+  // Max 6 suggestions
+  matches = matches.slice(0, 6);
+
+  if (!matches.length) {
+    box.innerHTML = '<div class="suggestions-empty">No matches found</div>';
+  } else {
+    box.innerHTML = matches.map(m => `
+      <div class="suggestion-item" onclick="selectSuggestion('${escapeHtml(m.label)}')">
+        <span class="suggestion-icon">${m.icon}</span>
+        <span class="suggestion-label">${escapeHtml(m.label)}</span>
+        ${m.count ? `<span class="suggestion-count">${m.count} listing${m.count > 1 ? 's' : ''}</span>` : ''}
+      </div>
+    `).join('');
+  }
+
+  box.classList.add('open');
+}
+
+function hideSuggestions() {
+  const box = document.getElementById('searchSuggestions');
+  if (box) box.classList.remove('open');
+}
+
+function selectSuggestion(value) {
+  const input = document.getElementById('searchInput');
+  if (input) input.value = value;
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) clearBtn.style.display = 'flex';
+  hideSuggestions();
+  applyFiltersAndRender();
+}
+
+// ============================================================
 // CLEAR FILTERS
 // ============================================================
 function clearAllFilters() {
   // Reset search
   const si = searchInput();
   if (si) si.value = '';
+  // Reset clear button
+  const clearBtn = document.getElementById('searchClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
+  hideSuggestions();
 
   // Reset checkboxes
   document.querySelectorAll('.filter-sidebar input[type="checkbox"]')
@@ -358,11 +460,34 @@ function escapeHtml(str) {
 document.addEventListener('DOMContentLoaded', () => {
 
   // Search button
-  document.getElementById('searchBtn')?.addEventListener('click', applyFiltersAndRender);
+  document.getElementById('searchBtn')?.addEventListener('click', () => {
+    hideSuggestions();
+    applyFiltersAndRender();
+  });
 
   // Search on Enter key
   document.getElementById('searchInput')?.addEventListener('keydown', e => {
-    if (e.key === 'Enter') applyFiltersAndRender();
+    if (e.key === 'Enter') { hideSuggestions(); applyFiltersAndRender(); }
+  });
+
+  // Search input — show/hide clear btn + suggestions as user types
+  document.getElementById('searchInput')?.addEventListener('input', function() {
+    const val = this.value.trim();
+    // Show/hide clear button
+    const clearBtn = document.getElementById('searchClearBtn');
+    if (clearBtn) clearBtn.style.display = val ? 'flex' : 'none';
+    // Show suggestions
+    if (val.length >= 1) {
+      showSuggestions(val);
+    } else {
+      hideSuggestions();
+      applyFiltersAndRender();
+    }
+  });
+
+  // Hide suggestions when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('.search-wrap')) hideSuggestions();
   });
 
   // Sort change
