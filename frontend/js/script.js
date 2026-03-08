@@ -396,6 +396,15 @@ function showSuggestions(query) {
     `).join('');
   }
 
+  // Position fixed dropdown under the input
+  const input = document.getElementById('searchInput');
+  if (input) {
+    const rect = input.getBoundingClientRect();
+    box.style.top  = (rect.bottom + 8) + 'px';
+    box.style.left = rect.left + 'px';
+    box.style.width = rect.width + 'px';
+    box.style.maxWidth = rect.width + 'px';
+  }
   box.classList.add('open');
 }
 

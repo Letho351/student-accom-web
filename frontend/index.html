@@ -64,23 +64,9 @@
     }
     .mode-btn--inactive:hover { background: #f1f5f9; }
 
-    /* ── Clear button inside search-wrap ── */
-    .search-clear-btn {
-      flex-shrink: 0;
-      background: #fff;
-      color: #1e293b;
-      border: 1.5px solid #e2e8f0;
-      font-weight: 700;
-      white-space: nowrap;
-    }
-    .search-clear-btn:hover { background: #f1f5f9; }
-
     /* ── Suggestions dropdown ── */
     .search-suggestions {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      right: 0;
+      position: fixed;
       background: #fff;
       border-radius: 12px;
       box-shadow: 0 20px 60px rgba(0,0,0,0.3);
@@ -88,6 +74,8 @@
       overflow: hidden;
       display: none;
       border: 1px solid #e2e8f0;
+      width: 100%;
+      max-width: 668px;
     }
     .search-suggestions.open { display: block; }
     .suggestion-item {
@@ -403,10 +391,9 @@
           </div>
 
           <!-- Search wrap — original structure preserved -->
-          <div class="search-wrap" style="position:relative;">
+          <div class="search-wrap" style="position:relative; overflow:visible;">
             <input id="searchInput" placeholder="Search by location..." autocomplete="off" spellcheck="false" />
-            <button class="btn btn--ghost search-clear-btn" id="searchClearBtn" onclick="clearSearch()">✕ Clear</button>
-            <button class="btn btn--primary" id="searchBtn">Search</button>
+<button class="btn btn--primary" id="searchBtn">Search</button>
             <!-- Suggestions -->
             <div class="search-suggestions" id="searchSuggestions"></div>
           </div>
