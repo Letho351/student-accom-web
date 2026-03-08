@@ -353,15 +353,16 @@ function clearSearch() {
 // ============================================================
 // SUGGESTIONS
 // ============================================================
+
 function showSuggestions(query) {
+
   const box = document.getElementById('searchSuggestions');
-  if (!box || !ALL_PROPS.length) return;
+  if (!box) return;
 
   const q = query.toLowerCase();
   let matches = [];
 
   if (SEARCH_MODE === 'location') {
-    // Unique locations that match
     const seen = new Set();
     ALL_PROPS.forEach(p => {
       if (!p.location) return;
@@ -369,35 +370,33 @@ function showSuggestions(query) {
       if (loc.toLowerCase().includes(q) && !seen.has(loc.toLowerCase())) {
         seen.add(loc.toLowerCase());
         const count = ALL_PROPS.filter(x => x.location?.trim().toLowerCase() === loc.toLowerCase()).length;
-        matches.push({ label: loc, icon: '📍', count });
+        matches.push({ label: loc, count });
       }
     });
   } else {
-    // Property names
     ALL_PROPS.forEach(p => {
       if (!p.title) return;
       if (p.title.toLowerCase().includes(q)) {
-        matches.push({ label: p.title, icon: '🏠', count: null });
+        matches.push({ label: p.title });
       }
     });
   }
 
-  // Max 6 suggestions
   matches = matches.slice(0, 6);
 
-  // Position under input first
+  // Position under input
   const input = document.getElementById('searchInput');
   if (input) {
     const rect = input.getBoundingClientRect();
-    box.style.top    = (rect.bottom + 6) + 'px';
-    box.style.left   = rect.left + 'px';
-    box.style.width  = rect.width + 'px';
+    box.style.position = 'fixed';
+    box.style.top   = (rect.bottom + 6) + 'px';
+    box.style.left  = rect.left + 'px';
+    box.style.width = rect.width + 'px';
   }
 
   if (!matches.length) {
     box.innerHTML = '<div class="suggestions-empty">No matches found</div>';
   } else {
-    // Build items using data attribute — safe against quotes/apostrophes
     box.innerHTML = matches.map((m, i) => `
       <div class="suggestion-item" data-idx="${i}">
         <span class="suggestion-label">${escapeHtml(m.label)}</span>
@@ -405,67 +404,30 @@ function showSuggestions(query) {
       </div>
     `).join('');
 
-    // Attach events using JS — no inline handlers
     box.querySelectorAll('.suggestion-item').forEach((el, i) => {
       const label = matches[i].label;
-      const pick = (e) => { e.preventDefault(); selectSuggestion(label); };
-      el.addEventListener('mousedown', pick);
-      el.addEventListener('touchend', pick);
+      el.addEventListener('mousedown', () => selectSuggestion(label));
+      el.addEventListener('touchend',  (e) => { e.preventDefault(); selectSuggestion(label); });
     });
   }
 
+  box.style.display = 'block';
   box.classList.add('open');
 }
 
 function hideSuggestions() {
   const box = document.getElementById('searchSuggestions');
-  if (box) box.classList.remove('open');
+  if (box) {
+    box.style.display = 'none';
+    box.classList.remove('open');
+  }
 }
 
 function selectSuggestion(value) {
   const input = document.getElementById('searchInput');
   if (input) input.value = value;
-
   hideSuggestions();
   applyFiltersAndRender();
-}
-
-// ============================================================
-// CLEAR FILTERS
-// ============================================================
-function clearAllFilters() {
-  // Reset search
-  const si = searchInput();
-  if (si) si.value = '';
-  hideSuggestions();
-
-  // Reset checkboxes
-  document.querySelectorAll('.filter-sidebar input[type="checkbox"]')
-    .forEach(cb => cb.checked = false);
-
-  // Reset price range
-  const pr = priceRange();
-  if (pr) {
-    pr.value = pr.max;
-    pr.style.setProperty('--val', '100%');
-    const maxEl = document.getElementById('priceMax');
-    if (maxEl) maxEl.textContent = Number(pr.max).toLocaleString();
-  }
-
-  // Reset sort
-  const ss = sortSelect();
-  if (ss) ss.value = 'newest';
-
-  applyFiltersAndRender();
-}
-
-// ============================================================
-// HELPERS
-// ============================================================
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(str));
-  return div.innerHTML;
 }
 
 // ============================================================
