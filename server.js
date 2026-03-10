@@ -199,6 +199,9 @@ app.get("/", (req, res) => {
   }
 });
 
+// Health check for UptimeRobot
+app.get("/health", (req, res) => res.status(200).json({ status: "ok" }));
+
 // GET all properties
 app.get("/properties", async (req, res) => {
   try {
