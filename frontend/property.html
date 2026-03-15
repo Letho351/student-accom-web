@@ -737,9 +737,9 @@
         const transportTags= tagList(p.transport_options);
 
         document.getElementById('bottomSections').innerHTML = [
-          bottomSection('Amenities & Utilities', '✨', amenityTags),
-          bottomSection('Security Features', '🔒', securityTags),
-          bottomSection('Transport Options', '🚌', transportTags),
+          bottomSection('Amenities & Utilities', amenityTags),
+          bottomSection('Security Features', securityTags),
+          bottomSection('Transport Options', transportTags),
         ].join('');
 
         // ---- Map ----
