@@ -354,12 +354,12 @@
   <header class="topbar" id="topbar">
     <a href="/" class="brand">StudentAccomo<span class="brand-dot"></span></a>
     <nav>
-      <a href="/">🏠 Home</a>
-      <a href="/#about">ℹ️ About</a>
-      <a href="/inquiry.html">✉️ Contact</a>
+      <a href="/">Home</a>
+      <a href="/#about">About</a>
+      <a href="/inquiry.html">Contact</a>
     </nav>
     <div class="topbar-right">
-      <button class="admin-login-btn" onclick="window.location.href='/admin-login.html'">🔐 Admin Login</button>
+      <button class="admin-login-btn" onclick="window.location.href='/admin-login.html'">Admin Login</button>
       <button class="hamburger" id="hamburger" aria-label="Toggle menu">
         <span></span><span></span><span></span>
       </button>
@@ -368,10 +368,10 @@
 
   <!-- Mobile Nav -->
   <nav class="mobile-nav" id="mobileNav">
-    <a href="/">🏠 Home</a>
-    <a href="/#about">ℹ️ About</a>
-    <a href="/inquiry.html">✉️ Contact</a>
-    <a href="/admin-login.html" style="color:var(--coral);font-weight:700;">🔐 Admin Login</a>
+    <a href="/">Home</a>
+    <a href="/#about">About</a>
+    <a href="/inquiry.html">Contact</a>
+    <a href="/admin-login.html" style="color:var(--coral);font-weight:700;">Admin Login</a>
   </nav>
 
   <!-- Lightbox -->
@@ -635,7 +635,7 @@
         document.getElementById('availBanner').innerHTML = `
           <div class="avail-banner ${isAvail ? 'available' : 'full'}">
             ${isAvail
-              ? `✅ Available — ${p.rooms_available} room${p.rooms_available > 1 ? 's' : ''} left`
+              ? `Available — ${p.rooms_available} room${p.rooms_available > 1 ? 's' : ''} left`
               : '🔴 Currently Full'}
           </div>`;
 
