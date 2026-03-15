@@ -292,7 +292,7 @@ function renderList(list) {
       <div class="body">
         <h3>${escapeHtml(p.title || 'Untitled')}</h3>
         <div class="location">
-          <span>📍</span>
+          <span></span>
           <span>${escapeHtml(p.location || 'Location not specified')}</span>
         </div>
         <div class="price">
@@ -302,7 +302,7 @@ function renderList(list) {
         <div class="tags">
           ${tags.map(t => `<span class="tag ${t.cls}">${escapeHtml(t.label)}</span>`).join('')}
           ${isAvail && p.rooms_available
-            ? `<span class="tag tag--green">🚪 ${p.rooms_available} room${p.rooms_available > 1 ? 's' : ''} left</span>`
+            ? `<span class="tag tag--green"> ${p.rooms_available} room${p.rooms_available > 1 ? 's' : ''} left</span>`
             : ''
           }
         </div>

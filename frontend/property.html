@@ -435,7 +435,7 @@
             <!-- Title & location -->
             <h2 id="propTitle"></h2>
             <div class="details-location" id="propLocation">
-              <span>📍</span><span></span>
+              <span></span><span></span>
             </div>
 
             <!-- Price -->
@@ -474,7 +474,7 @@
 
             <!-- Map -->
             <div class="map-wrap" id="mapWrap" style="display:none;">
-              <div class="prop-section-title" style="margin-bottom:12px;">📍 Location</div>
+              <div class="prop-section-title" style="margin-bottom:12px;">Location</div>
               <div class="map-frame" id="mapFrame"></div>
             </div>
 
@@ -642,7 +642,7 @@
         // ---- Title & location ----
         document.getElementById('propTitle').textContent = p.title || '';
         document.getElementById('propLocation').innerHTML =
-          `<span>📍</span><span>${escHtml(p.location || 'Location not specified')}</span>`;
+          `<span></span><span>${escHtml(p.location || 'Location not specified')}</span>`;
 
         // ---- Price ----
         document.getElementById('propPrice').innerHTML = p.price
