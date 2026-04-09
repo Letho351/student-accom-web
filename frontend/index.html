@@ -99,6 +99,14 @@
     }
     .mode-btn--inactive:hover { background: #f1f5f9; }
 
+    /* Brand name row — keeps dot inline with text */
+    .brand-name-row {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      line-height: 1;
+    }
+
     /* Brand sub */
     .brand-sub {
       display: block;
@@ -349,7 +357,7 @@
   ============================================================ -->
   <header class="topbar" id="topbar">
     <a href="/" class="brand">
-      StudentLink Agency<span class="brand-dot"></span>
+      <span class="brand-name-row">StudentLink Agency<span class="brand-dot"></span></span>
       <span class="brand-sub">Accommodation</span>
     </a>
 
@@ -738,8 +746,8 @@
     filterToggle.addEventListener('click', () => {
       filterSidebar.classList.toggle('open');
       filterToggle.textContent = filterSidebar.classList.contains('open')
-        ? 'Hide Filters'
-        : ' Filters';
+        ? '✕ Hide Filters'
+        : '⚙️ Filters';
     });
   </script>
 
