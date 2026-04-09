@@ -69,7 +69,6 @@ async function loadProperties() {
     if (!res.ok) throw new Error('Failed to load');
     ALL_PROPS = await res.json();
 
-    // Update price range max based on actual data
     if (ALL_PROPS.length) {
       const maxPrice = Math.max(...ALL_PROPS.map(p => Number(p.price) || 0));
       const rangeEl = priceRange();
@@ -102,35 +101,52 @@ async function loadProperties() {
 // HERO STATS
 // ============================================================
 function updateHeroStats(props) {
-  const total   = props.length;
-  const avail   = props.filter(p => Number(p.rooms_available) > 0).length;
-  const rooms   = props.reduce((sum, p) => sum + (Number(p.rooms_available) || 0), 0);
-  const prices  = props.map(p => Number(p.price)).filter(Boolean);
+  const total    = props.length;
+  const avail    = props.filter(p => Number(p.rooms_available) > 0).length;
+  const rooms    = props.reduce((sum, p) => sum + (Number(p.rooms_available) || 0), 0);
+  const prices   = props.map(p => Number(p.price)).filter(Boolean);
   const minPrice = prices.length ? Math.min(...prices) : 0;
 
-  animateCount('statTotal', total);
-  animateCount('statAvail', avail);
-  animateCount('statRooms', rooms);
+  animateCount('statTotal', total, '');
+  animateCount('statAvail', avail, '');
+  animateCount('statRooms', rooms, '');
 
   const fromEl = document.getElementById('statFrom');
-  if (fromEl) fromEl.textContent = minPrice ? `R${minPrice.toLocaleString()}` : '—';
+  if (fromEl) {
+    if (minPrice) {
+      animateCount('statFrom', minPrice, 'R');
+    } else {
+      fromEl.textContent = '—';
+    }
+  }
 
-  // About section stats
-  animateCount('aboutTotal', total);
-  animateCount('aboutRooms', rooms);
+  animateCount('aboutTotal', total, '');
+  animateCount('aboutRooms', rooms, '');
 }
 
-function animateCount(id, target) {
+function animateCount(id, target, prefix = '') {
   const el = document.getElementById(id);
   if (!el) return;
-  const duration = 1000;
-  const step = Math.ceil(target / (duration / 16));
-  let current = 0;
-  const timer = setInterval(() => {
-    current = Math.min(current + step, target);
-    el.textContent = current.toLocaleString();
-    if (current >= target) clearInterval(timer);
-  }, 16);
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(8px)';
+  el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+  setTimeout(() => {
+    el.style.opacity = '1';
+    el.style.transform = 'translateY(0)';
+    const steps = 40;
+    const interval = 1200 / steps;
+    let step = 0;
+    const timer = setInterval(() => {
+      step++;
+      const eased = 1 - Math.pow(1 - step / steps, 3);
+      const current = Math.round(eased * target);
+      el.textContent = prefix + current.toLocaleString();
+      if (step >= steps) {
+        el.textContent = prefix + target.toLocaleString();
+        clearInterval(timer);
+      }
+    }, interval);
+  }, 100);
 }
 
 // ============================================================
@@ -154,10 +170,8 @@ function getFilters() {
 
 function applyFiltersAndRender() {
   const f = getFilters();
-
   let list = [...ALL_PROPS];
 
-  // Search
   if (f.search) {
     list = list.filter(p => {
       const field = f.mode === 'location' ? (p.location || '') : (p.title || '');
@@ -165,15 +179,12 @@ function applyFiltersAndRender() {
     });
   }
 
-  // Price
   list = list.filter(p => !p.price || Number(p.price) <= f.maxPrice);
 
-  // Room type
   if (f.roomTypes.length) {
     list = list.filter(p => p.room_type && f.roomTypes.includes(p.room_type));
   }
 
-  // Student type
   if (f.studTypes.length) {
     list = list.filter(p => {
       if (!p.student_types) return false;
@@ -181,7 +192,6 @@ function applyFiltersAndRender() {
     });
   }
 
-  // Funding
   if (f.fundings.length) {
     list = list.filter(p => {
       if (!p.funding_options) return false;
@@ -189,7 +199,6 @@ function applyFiltersAndRender() {
     });
   }
 
-  // Amenities (must have ALL checked)
   if (f.amenities.length) {
     list = list.filter(p => {
       const combined = `${p.amenities || ''} ${p.utilities || ''}`;
@@ -197,22 +206,17 @@ function applyFiltersAndRender() {
     });
   }
 
-  // No deposit
   if (f.noDeposit) {
     list = list.filter(p => p.deposit_type === 'NO' || !p.deposit_type);
   }
 
-  // Available only
   if (f.availOnly) {
     list = list.filter(p => Number(p.rooms_available) > 0);
   }
 
-  // Sort
   list = sortList(list, f.sort);
-
   FILTERED = list;
 
-  // Update active filter count
   const activeCount = [
     f.roomTypes.length, f.studTypes.length, f.fundings.length,
     f.amenities.length, f.noDeposit ? 1 : 0, f.availOnly ? 1 : 0,
@@ -321,14 +325,12 @@ function renderList(list) {
 // ============================================================
 function setSearchMode(mode) {
   SEARCH_MODE = mode;
-  // Update button states
   const locBtn  = document.getElementById('modeLocation');
   const nameBtn = document.getElementById('modeName');
   if (locBtn && nameBtn) {
     locBtn.className  = 'mode-btn ' + (mode === 'location' ? 'mode-btn--active' : 'mode-btn--inactive');
     nameBtn.className = 'mode-btn ' + (mode === 'name'     ? 'mode-btn--active' : 'mode-btn--inactive');
   }
-  // Update placeholder
   const input = document.getElementById('searchInput');
   if (input) {
     input.placeholder = mode === 'location' ? 'Search by location...' : 'Search by house name...';
@@ -384,32 +386,25 @@ function escapeHtml(str) {
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
 
-  // Search button
   document.getElementById('searchBtn')?.addEventListener('click', () => {
-      applyFiltersAndRender();
+    applyFiltersAndRender();
   });
 
-  // Search on Enter key
   document.getElementById('searchInput')?.addEventListener('keydown', e => {
     if (e.key === 'Enter') { applyFiltersAndRender(); }
   });
 
-  // Search input — filter as you type
   document.getElementById('searchInput')?.addEventListener('input', function() {
     applyFiltersAndRender();
   });
 
-  // Sort change
   document.getElementById('sortSelect')?.addEventListener('change', applyFiltersAndRender);
 
-  // Filter checkboxes — instant filter on change
   document.querySelectorAll('.filter-sidebar input[type="checkbox"]')
     .forEach(cb => cb.addEventListener('change', applyFiltersAndRender));
 
-  // Clear filters button
   document.getElementById('clearFilters')?.addEventListener('click', clearAllFilters);
 
-  // Price range slider
   const pr = priceRange();
   if (pr) {
     pr.addEventListener('input', () => {
@@ -421,6 +416,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load properties
   loadProperties();
 });

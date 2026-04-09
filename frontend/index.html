@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <title>StudentAccomo | VUT Student Accommodation Finder</title>
+  <title>StudentLink Agency | VUT Student Accommodation</title>
   <link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
@@ -13,25 +13,60 @@
   <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png" />
   <meta name="theme-color" content="#0f172a" />
 
-  <meta name="description" content="StudentAccomo is a trusted student accommodation platform helping VUT students find safe, affordable, and verified housing near Vaal University of Technology. Compare rooms, view prices, and secure your accommodation easily." />
+  <meta name="description" content="StudentLink Agency is a trusted student accommodation platform helping VUT students find safe, affordable, and verified housing near Vaal University of Technology. Compare rooms, view prices, and secure your accommodation easily." />
   <meta name="keywords" content="VUT student accommodation, student housing near VUT, student rooms Vanderbijlpark, Vaal University accommodation, student accommodation South Africa" />
-  <meta name="author" content="StudentAccomo" />
+  <meta name="author" content="StudentLink Agency" />
   <meta name="robots" content="index, follow" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="StudentAccomo | VUT Student Accommodation" />
+  <meta property="og:title" content="StudentLink Agency | VUT Student Accommodation" />
   <meta property="og:description" content="Find safe, affordable, verified student housing near VUT." />
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://www.studentaccomo.co.za" />
+  <meta property="og:url" content="https://www.studentlinkagency.co.za" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="/css/style.css" />
 
   <style>
+    /* Partner badge */
+    .partner-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.12);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 999px;
+      padding: 8px 18px 8px 10px;
+      margin-bottom: 20px;
+      opacity: 0;
+      transform: translateY(16px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+    .partner-badge.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .partner-badge img {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #fff;
+    }
+    .partner-badge-text {
+      font-size: 12px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+      letter-spacing: 0.2px;
+    }
+    .partner-badge-text strong {
+      color: #fff;
+    }
+
     /* Search mode toggle */
     /* ── Search toggles ── */
     .search-mode-toggle {
@@ -45,7 +80,7 @@
       border-radius: 999px;
       font-size: 14px;
       font-weight: 700;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
       cursor: pointer;
       transition: all 180ms ease;
       border: 2px solid transparent;
@@ -55,7 +90,7 @@
       background: var(--coral);
       border-color: var(--coral);
       color: #fff;
-      box-shadow: 0 4px 16px rgba(232,79,63,0.4);
+      box-shadow: 0 4px 16px rgba(181,144,10,0.4);
     }
     .mode-btn--inactive {
       background: #fff;
@@ -63,6 +98,39 @@
       color: #1e293b;
     }
     .mode-btn--inactive:hover { background: #f1f5f9; }
+
+    /* Brand sub */
+    .brand-sub {
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      color: #b5900a;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      line-height: 1;
+      margin-top: 2px;
+      font-family: 'Inter', sans-serif;
+    }
+    .topbar .brand {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1px;
+    }
+
+    /* Hero stat animations */
+    .hero-stat-num {
+      transition: color 0.3s ease;
+    }
+    .hero-stat:hover .hero-stat-num {
+      color: var(--coral);
+    }
+    .hero-stat-divider {
+      transition: background 0.3s ease;
+    }
+    .hero-stat:hover ~ .hero-stat-divider,
+    .hero-stat-divider:has(+ .hero-stat:hover) {
+      background: var(--coral);
+    }
 
     /* Filter toggle button — mobile only */
     .filter-toggle-btn {
@@ -281,7 +349,8 @@
   ============================================================ -->
   <header class="topbar" id="topbar">
     <a href="/" class="brand">
-      StudentAccomo<span class="brand-dot"></span>
+      StudentLink Agency<span class="brand-dot"></span>
+      <span class="brand-sub">Accommodation</span>
     </a>
 
     <nav>
@@ -317,7 +386,7 @@
       <div class="container hero-inner">
 
         <div class="hero-eyebrow">
-          <span></span> VUT's #1 Accommodation Platform
+          <span>🎓</span> VUT's #1 Accommodation Platform
         </div>
 
         <h1>Find Your Perfect<br /><span>Student Home</span> Near VUT</h1>
@@ -348,6 +417,13 @@
             <div class="hero-stat-num" id="statFrom">—</div>
             <div class="hero-stat-label">Starting From</div>
           </div>
+        </div>
+
+        <!-- Partner Badge -->
+        <div class="partner-badge" id="partnerBadge">
+          <img src="/icons/studentlink-logo.png" alt="StudentLink Agency"
+               onerror="this.style.display='none'" />
+          <span class="partner-badge-text">In partnership with <strong>StudentLink Agency</strong></span>
         </div>
 
         <!-- Search -->
@@ -518,10 +594,10 @@
         <div class="about-grid">
 
           <div>
-            <div class="about-eyebrow">About Us</div>
+            <div class="about-eyebrow">🏢 About Us</div>
             <h2>Built for VUT Students, By People Who Care</h2>
             <p>
-              StudentAccomo is a dedicated accommodation platform built to take the stress
+              StudentLink Agency is a dedicated accommodation platform built to take the stress
               out of finding student housing near Vaal University of Technology.
             </p>
             <p>
@@ -595,7 +671,7 @@
   <footer class="footer">
     <div class="footer-inner">
       <div>
-        <div class="footer-brand">StudentAccomo<span>.</span></div>
+        <div class="footer-brand">StudentLink Agency<span>.</span></div>
         <p>The trusted student accommodation platform for VUT students.</p>
       </div>
       <div class="footer-links">
@@ -603,11 +679,11 @@
         <a href="#about">About</a>
         <a href="/inquiry.html">Contact</a>
         <a href="/admin-login.html">Admin</a>
-        <a href="https://studentaccomo.betteruptime.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-weight:700;">System Status</a>
+        <a href="https://studentlinkagency.betteruptime.com" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;font-weight:700;">🟢 System Status</a>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© <span id="year"></span> StudentAccomo | Built for VUT Students.</span>
+      <span>© <span id="year"></span> StudentAccomo | Built for VUT Students 🎓</span>
       <span>Vanderbijlpark, Gauteng, South Africa</span>
     </div>
   </footer>
@@ -615,7 +691,7 @@
   <!-- Floating WhatsApp Button -->
   <a
     class="fab-whatsapp"
-    href="https://wa.me/27791516769?text=Hi%2C%20I%20found%20StudentAccomo%20and%20I'm%20looking%20for%20accommodation%20near%20VUT."
+    href="https://wa.me/27791516769?text=Hi%2C%20I%20found%20StudentLink%20Agency%20and%20I'm%20looking%20for%20accommodation%20near%20VUT."
     target="_blank"
     rel="noopener"
     aria-label="Chat on WhatsApp"
@@ -663,7 +739,7 @@
       filterSidebar.classList.toggle('open');
       filterToggle.textContent = filterSidebar.classList.contains('open')
         ? 'Hide Filters'
-        : 'Filters';
+        : ' Filters';
     });
   </script>
 
