@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Send Inquiry — StudentAccomo</title>
+  <title>Send Inquiry — StudentLink Agency</title>
   <link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
@@ -15,10 +15,14 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 
   <style>
+    .brand-name-row { display:flex; align-items:center; gap:4px; line-height:1; }
+    .brand-sub { display:block; font-size:9px; font-weight:700; color:var(--coral); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+    .topbar .brand { flex-direction:column; align-items:flex-start; gap:1px; }
+
     .inquiry-page { padding: 40px 0 72px; }
 
     /* Two column layout on desktop */
@@ -423,7 +427,11 @@
     }
 
     @media (max-width: 480px) {
-      .inquiry-page { padding: 24px 0 56px; }
+      .brand-name-row { display:flex; align-items:center; gap:4px; line-height:1; }
+    .brand-sub { display:block; font-size:9px; font-weight:700; color:var(--coral); letter-spacing:2px; text-transform:uppercase; margin-top:2px; }
+    .topbar .brand { flex-direction:column; align-items:flex-start; gap:1px; }
+
+    .inquiry-page { padding: 24px 0 56px; }
       .inquiry-card-header { padding: 22px 20px; }
       .inquiry-card-header h2 { font-size: 20px; }
       .inquiry-card-body { padding: 20px 18px; }
@@ -437,7 +445,7 @@
 
   <!-- TOPBAR -->
   <header class="topbar" id="topbar">
-    <a href="/" class="brand">StudentAccomo<span class="brand-dot"></span></a>
+    <a href="/" class="brand"><span class="brand-name-row">StudentLink Agency<span class="brand-dot"></span></span><span class="brand-sub">Accommodation</span></a>
     <nav>
       <a href="/">Home</a>
       <a href="/#about">About</a>
@@ -453,10 +461,10 @@
 
   <!-- Mobile Nav -->
   <nav class="mobile-nav" id="mobileNav">
-    <a href="/">🏠 Home</a>
-    <a href="/#about">ℹ️ About</a>
-    <a href="/inquiry.html">✉️ Contact</a>
-    <a href="/admin-login.html" style="color:var(--coral);font-weight:700;">🔐 Admin Login</a>
+    <a href="/">Home</a>
+    <a href="/#about">About</a>
+    <a href="/inquiry.html">Contact</a>
+    <a href="/admin-login.html" style="color:var(--coral);font-weight:700;">Admin Login</a>
   </nav>
 
   <main class="container inquiry-page">
@@ -477,7 +485,7 @@
 
           <!-- Selected property badge (shown when coming from property page) -->
           <div class="selected-property" id="selectedPropertyBadge" style="display:none;">
-            <div class="selected-property-icon">🏠</div>
+            <div class="selected-property-icon"></div>
             <div class="selected-property-text">
               <div class="label">Inquiring about</div>
               <div class="name" id="selectedPropertyName">Loading...</div>
@@ -486,74 +494,74 @@
 
           <!-- Property select (shown when no propertyId in URL) -->
           <div class="field-group" id="propertySelectGroup">
-            <label>🏠 Property <span class="req">*</span></label>
+            <label>Property <span class="req">*</span></label>
             <select id="propertySelect">
               <option value="">Loading properties...</option>
             </select>
-            <div class="field-error" id="propertyErr">⚠️ Please select a property</div>
+            <div class="field-error" id="propertyErr">Please select a property</div>
           </div>
 
           <!-- Name -->
           <div class="field-group">
-            <label>👤 Full Name <span class="req">*</span></label>
+            <label>Full Name <span class="req">*</span></label>
             <input id="name" type="text" placeholder="e.g. Thabo Mokoena" autocomplete="name" />
-            <div class="field-error" id="nameErr">⚠️ Please enter your full name</div>
+            <div class="field-error" id="nameErr">Please enter your full name</div>
           </div>
 
           <!-- Email & Phone -->
           <div class="form-row">
             <div class="field-group" style="margin-bottom:0;">
-              <label>✉️ Email <span class="req">*</span></label>
+              <label>Email <span class="req">*</span></label>
               <input id="email" type="email" placeholder="your@email.com" autocomplete="email" />
-              <div class="field-error" id="emailErr">⚠️ Enter a valid email address</div>
+              <div class="field-error" id="emailErr">Enter a valid email address</div>
             </div>
             <div class="field-group" style="margin-bottom:0;">
-              <label>📱 Phone / WhatsApp <span class="req">*</span></label>
+              <label>Phone / WhatsApp <span class="req">*</span></label>
               <input id="phone" type="tel" placeholder="e.g. 079 151 6769" autocomplete="tel" />
-              <div class="field-error" id="phoneErr">⚠️ Please enter your phone number</div>
+              <div class="field-error" id="phoneErr">Please enter your phone number</div>
             </div>
           </div>
 
           <!-- Preferred contact -->
           <div class="field-group" style="margin-top:18px;">
-            <label>💬 Preferred Contact Method <span class="req">*</span></label>
+            <label>Preferred Contact Method <span class="req">*</span></label>
             <div class="contact-pills">
               <label class="contact-pill selected" id="pill-whatsapp">
                 <input type="radio" name="preferred_contact" value="whatsapp" checked />
-                <span>📱</span> WhatsApp
+                WhatsApp
               </label>
               <label class="contact-pill" id="pill-email">
                 <input type="radio" name="preferred_contact" value="email" />
-                <span>✉️</span> Email
+                Email
               </label>
               <label class="contact-pill" id="pill-phone">
                 <input type="radio" name="preferred_contact" value="phone" />
-                <span>📞</span> Phone Call
+                Phone Call
               </label>
             </div>
           </div>
 
           <!-- Message -->
           <div class="field-group" style="margin-top:18px;">
-            <label>💭 Message <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
+            <label>Message <span style="color:var(--text-muted);font-weight:400;text-transform:none;letter-spacing:0;">(optional)</span></label>
             <textarea id="message" rows="4" placeholder="Any specific questions? e.g. move-in date, viewing request..."></textarea>
           </div>
 
           <!-- Submit -->
           <button class="submit-btn" id="submitBtn">
-            <span class="submit-text">✉️ Send Inquiry</span>
+            <span class="submit-text">Send Inquiry</span>
             <span class="submit-spinner"></span>
           </button>
 
           <p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:12px;">
-            🔒 Your details are kept private and only shared with our admin team.
+            Your details are kept private and only shared with our admin team.
           </p>
 
         </div>
 
         <!-- Success state -->
         <div class="success-state" id="successState">
-          <div class="success-circle">✅</div>
+          <div class="success-circle"></div>
           <h3>Inquiry Sent!</h3>
           <p>Thanks! We've received your inquiry and will contact you via your preferred method shortly.</p>
           <a href="/" class="btn btn--primary">← Browse More Properties</a>
@@ -631,7 +639,7 @@
   </main>
 
   <!-- Floating WhatsApp -->
-  <a class="fab-whatsapp" href="https://wa.me/27791516769?text=Hi%2C%20I%20found%20StudentAccomo%20and%20I'm%20looking%20for%20accommodation%20near%20VUT." target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
+  <a class="fab-whatsapp" href="https://wa.me/27791516769?text=Hi%2C%20I%20found%20StudentLink%20Agency%20and%20I'm%20looking%20for%20accommodation%20near%20VUT." target="_blank" rel="noopener" aria-label="Chat on WhatsApp">
     <div class="fab-tooltip">Chat with us</div>
     <svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
   </a>
@@ -756,7 +764,7 @@
         errBox.style.cssText = 'margin-top:14px;padding:14px 16px;background:#fee2e2;border:1px solid #fca5a5;border-radius:10px;font-size:13px;font-weight:600;color:#dc2626;text-align:center;line-height:1.6;';
         document.getElementById('submitBtn').insertAdjacentElement('afterend', errBox);
       }
-      errBox.textContent = '⚠️ ' + msg;
+      errBox.textContent = msg;
       errBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 

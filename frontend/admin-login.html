@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Login — StudentAccomo</title>
+  <title>Admin Login — StudentLink Agency</title>
   <link rel="icon" type="image/x-icon" href="/icons/favicon.ico" />
   <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
   <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
@@ -13,7 +13,7 @@
   <meta name="theme-color" content="#0f172a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body class="admin-login-body">
@@ -30,9 +30,9 @@
   <div class="login-container">
 
     <!-- Shield icon -->
-    <div class="login-shield">🔐</div>
+    <div class="login-shield"></div>
 
-    <div class="login-brand">Student<span>Accomo</span></div>
+    <div class="login-brand">StudentLink <span>Agency</span></div>
     <h2>Admin Access</h2>
     <p class="login-sub">Secure portal — authorized personnel only</p>
 
@@ -77,7 +77,7 @@
     // ---- Particles ----
     (function spawnParticles() {
       const container = document.getElementById('particles');
-      const colors = ['rgba(232,79,63,0.5)', 'rgba(245,166,35,0.4)', 'rgba(99,102,241,0.4)', 'rgba(255,255,255,0.25)'];
+      const colors = ['rgba(181,144,10,0.5)', 'rgba(245,166,35,0.4)', 'rgba(99,102,241,0.4)', 'rgba(255,255,255,0.25)'];
       const sizes  = [3, 4, 5, 6, 3, 4];
 
       for (let i = 0; i < 28; i++) {
@@ -140,7 +140,7 @@
       const msg      = document.getElementById('msg');
 
       if (!username || !password) {
-        msg.textContent = '⚠️ Please enter your username and password.';
+        msg.textContent = 'Please enter your username and password.';
         shakeContainer();
         return;
       }
@@ -159,7 +159,7 @@
         const data = await res.json();
 
         if (!res.ok) {
-          msg.textContent = '❌ ' + (data.error || 'Invalid credentials');
+          msg.textContent = data.error || 'Invalid credentials';
           shakeContainer();
           btn.classList.remove('loading');
           return;
@@ -177,7 +177,7 @@
 
           // Success flash
           msg.style.color = '#4ade80';
-          msg.textContent = ' Access granted. Redirecting...';
+          msg.textContent = '✅ Access granted. Redirecting...';
 
           setTimeout(() => {
             window.location.replace('/admin/dashboard.html');
@@ -186,7 +186,7 @@
 
       } catch (err) {
         console.error(err);
-        msg.textContent = '⚠️ Server error. Please try again.';
+        msg.textContent = 'Server error. Please try again.';
         btn.classList.remove('loading');
       }
     }
@@ -202,14 +202,14 @@
     function forgotPassword() {
       const msg = document.getElementById('msg');
       msg.style.color = 'rgba(255,255,255,0.5)';
-      msg.textContent = ' Contact your system administrator to reset your password.';
+      msg.textContent = '📧 Contact your system administrator to reset your password.';
     }
   </script>
 
   <style>
     /* Extra login styles */
     .login-brand {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 20px;
       font-weight: 800;
       color: #fff;
@@ -221,7 +221,7 @@
     .login-container h2 {
       color: rgba(255,255,255,0.9);
       font-size: 20px;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-weight: 600;
       margin-bottom: 6px;
     }
@@ -241,14 +241,14 @@
       font-size: 14px;
       margin-bottom: 14px;
       transition: all 180ms ease;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
     }
 
     .login-container input::placeholder { color: rgba(255,255,255,0.25); }
 
     .login-container input:focus {
       border-color: var(--coral);
-      box-shadow: 0 0 0 3px rgba(232,79,63,0.18);
+      box-shadow: 0 0 0 3px rgba(181,144,10,0.18);
       background: rgba(255,255,255,0.07);
       outline: none;
     }
@@ -300,7 +300,7 @@
       color: rgba(255,255,255,0.35);
       background: none; border: none;
       cursor: pointer;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       transition: color 180ms;
       padding: 0;
     }
@@ -309,13 +309,13 @@
     .login-btn {
       width: 100%;
       padding: 14px;
-      background: linear-gradient(135deg, var(--coral), #c93828);
+      background: linear-gradient(135deg, var(--coral), #9a7a08);
       color: #fff;
       border: none;
       border-radius: var(--radius-sm);
       font-size: 15px;
       font-weight: 700;
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', sans-serif;
       cursor: pointer;
       transition: all 280ms ease;
       display: flex;
@@ -336,7 +336,7 @@
       transition: opacity 200ms;
     }
     .login-btn:hover::after { opacity: 1; }
-    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(232,79,63,0.35); }
+    .login-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(181,144,10,0.35); }
     .login-btn:active { transform: scale(0.98); }
     .login-btn.loading { opacity: 0.8; pointer-events: none; }
 
