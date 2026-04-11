@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — StudentAccomo Admin</title>
+  <title>Dashboard — StudentLink Agency Admin</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/css/style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 
   <style>
     * { box-sizing: border-box; }
 
-    body { margin: 0; background: var(--bg); font-family: 'Plus Jakarta Sans', sans-serif; }
+    body { margin: 0; background: var(--bg); font-family: 'Inter', 'Plus Jakarta Sans', sans-serif; }
 
     /* ---- TOP BAR ---- */
     .admin-topbar {
@@ -29,7 +29,7 @@
     }
 
     .admin-topbar .brand {
-      font-family: 'Syne', sans-serif;
+      font-family: 'Inter', sans-serif;
       font-size: 18px;
       font-weight: 800;
       color: #fff;
@@ -39,7 +39,7 @@
     .admin-topbar .brand-sub {
       font-size: 12px;
       color: rgba(255,255,255,0.35);
-      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-family: 'Inter', 'Plus Jakarta Sans', sans-serif;
       font-weight: 500;
       margin-left: 6px;
     }
@@ -167,7 +167,7 @@
       font-size: 32px;
       font-weight: 800;
       color: #0d0f1a;
-      font-family: 'Syne', sans-serif;
+      font-family: 'Inter', sans-serif;
       line-height: 1;
     }
 
@@ -310,7 +310,7 @@
 
   <!-- TOP BAR -->
   <div class="admin-topbar">
-    <div class="brand">Student<span>Accomo</span><span class="brand-sub">Admin</span></div>
+    <div class="brand">StudentLink <span>Agency</span><span class="brand-sub">Admin</span></div>
     <div class="admin-user-badge">
       <div class="avatar" id="avatarInitial">A</div>
       <span class="username" id="adminUsername">Admin</span>
@@ -343,7 +343,7 @@
       </div>
 
       <div class="sidebar-logout">
-        <div class="menu-item" onclick="logout()" style="color:#e84f3f;">
+        <div class="menu-item" onclick="logout()" style="color:var(--coral);">
           <span class="menu-icon">🚪</span>
           <span class="menu-text">Logout</span>
         </div>
@@ -490,7 +490,7 @@
             plugins: {
               legend: {
                 position: 'bottom',
-                labels: { font: { family: 'Plus Jakarta Sans', size: 11 }, padding: 12, boxWidth: 10 }
+                labels: { font: { family: 'Inter', size: 11 }, padding: 12, boxWidth: 10 }
               }
             }
           }
@@ -514,8 +514,8 @@
             options: {
               plugins: { legend: { display: false } },
               scales: {
-                y: { beginAtZero: true, ticks: { font: { family: 'Plus Jakarta Sans', size: 11 } }, grid: { color: '#f3f4f6' } },
-                x: { ticks: { font: { family: 'Plus Jakarta Sans', size: 10 } }, grid: { display: false } }
+                y: { beginAtZero: true, ticks: { font: { family: 'Inter', size: 11 } }, grid: { color: '#f3f4f6' } },
+                x: { ticks: { font: { family: 'Inter', size: 10 } }, grid: { display: false } }
               }
             }
           });
