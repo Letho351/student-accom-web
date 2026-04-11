@@ -34,7 +34,7 @@
 
     <div class="login-brand">StudentLink <span>Agency</span></div>
     <h2>Admin Access</h2>
-    <p class="login-sub">Secure portal — authorized personnel only</p>
+    <p class="login-sub">Authorized personnel only</p>
 
     <input id="username" placeholder="Username" autocomplete="username" />
 
@@ -57,7 +57,7 @@
     </div>
 
     <button class="login-btn" id="loginBtn">
-      <span class="btn-text">Sign In Securely</span>
+      <span class="btn-text">Sign In</span>
       <span class="login-spinner"></span>
     </button>
 
@@ -177,7 +177,7 @@
 
           // Success flash
           msg.style.color = '#4ade80';
-          msg.textContent = '✅ Access granted. Redirecting...';
+          msg.textContent = 'Access granted. Redirecting...';
 
           setTimeout(() => {
             window.location.replace('/admin/dashboard.html');
@@ -202,7 +202,7 @@
     function forgotPassword() {
       const msg = document.getElementById('msg');
       msg.style.color = 'rgba(255,255,255,0.5)';
-      msg.textContent = '📧 Contact your system administrator to reset your password.';
+      msg.textContent = 'Contact your system administrator to reset your password.';
     }
   </script>
 
