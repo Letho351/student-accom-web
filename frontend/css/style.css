@@ -1653,8 +1653,8 @@ input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
   padding: 14px;
 }
 .login-shield img {
-  width: 180%;
-  height: 180%;
+  width: 140%;
+  height: 140%;
   object-fit: cover;
   object-position: center;
   display: block;
